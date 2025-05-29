@@ -1,0 +1,156 @@
+Project Name: PlayMyJam
+Description:
+PlayMyJam is a mobile app designed for pub and club goers to request and bid for songs to be played by DJs in real time. The app creates an interactive experience by allowing users to buy tokens, bid for their favorite songs, and even generate AI music to be played. DJs manage requests through a dedicated dashboard, while club owners and admins monitor transactions, song approvals, and earnings.
+
+The app includes location-based features to find participating clubs, a leaderboard for top DJs, and a merchandise store that sells branded T-shirts and caps with QR codes.
+
+The primary goal of PlayMyJam is to enhance the nightlife experience by giving customers control over the music while allowing DJs to maximize engagement and earnings.
+
+Core Functionalities & User Flow
+1. User Roles & Registration
+Customers register to buy tokens, bid on songs, request AI-generated music, and purchase merchandise.
+
+DJs register to manage song requests, approve bids, and get booked for events.
+
+Club Owners register to manage their clubs, track song requests, and monitor earnings.
+
+Admins oversee the entire system, including financial transactions, user activity, and analytics.
+
+2. App Screens & Features
+A. General Screens
+Splash Screen
+
+Displays the PlayMyJam logo.
+
+Transitions smoothly to login or home screen.
+
+Login & Registration
+
+Users sign up via email or social login.
+
+DJs and Club Owners can register via profile settings.
+
+Profile Management
+
+Users can edit their profile, update preferences, and toggle their role (Customer/DJ/Club Owner).
+
+DJs can link themselves to a club via a dropdown selection.
+
+Users can view their transaction history (bids, purchases, song requests).
+
+B. Customer Features
+Find Nearby Clubs
+
+Users can search and see clubs using PlayMyJam.
+
+Location-based search with distance filters.
+
+Users can connect to a DJ in a specific club.
+
+Song Request & Bidding
+
+Users see the playlist for the club they are connected to.
+
+Users can bid a minimum of R20 for their song to play next.
+
+The highest bid gets priority, and songs are queued accordingly.
+
+Users can vote for songs they want to be played across all PlayMyJam-connected DJs.
+
+AI Music Generator
+
+Users input their preferences (genre, mood, tempo).
+
+AI generates a unique track that can be submitted for DJ approval.
+
+Generated songs require a token purchase for submission.
+
+Merchandise Store
+
+Users browse and purchase PlayMyJam T-shirts and caps.
+
+Each product has a unique QR code containing buyer info (name, purchase date, social links).
+
+QR codes can be scanned using any scanner, including PlayMyJam.
+
+C. DJ Features
+DJ Dashboard
+
+Displays incoming song requests with user details and bid amounts.
+
+Shows a live queue of upcoming songs.
+
+DJs can approve/reject song requests.
+
+Notifications for high-bid requests and global song requests (songs requested to play at multiple clubs).
+
+Option to upload daily music playlists.
+
+Earnings & Booking
+
+DJs can track earnings from song requests.
+
+A leaderboard showcases top DJs based on earnings and user votes.
+
+DJs can be hired by other venues through the app.
+
+D. Club Owner & Admin Features
+Club Management (Owner)
+
+Club Owners can register their venue details.
+
+They can view customer engagement, DJ activity, and earnings.
+
+Manage the club’s music queue and approve DJs.
+
+Admin Dashboard
+
+Track total earnings from token sales, merchandise, and song requests.
+
+Manage user accounts (ban DJs/customers if needed).
+
+Review financial analytics, trending songs, and club statistics.
+
+Oversee global requests (songs requested across all clubs).
+
+3. Technical Requirements
+Design & UI
+The UI must be modern, sleek, and visually appealing.
+
+The color scheme will use a linear gradient background with:
+
+Primary Colors: ['#486CA7', '#3a3a6a', '#222240']
+
+Dark-themed with vibrant accents.
+
+Technology Stack
+Frontend: React Native + Expo
+
+Navigation: Expo Router
+
+State Management: Redux Toolkit
+
+Database & Backend: Firebase Firestore
+
+Authentication: Firebase Auth + Google/Facebook Login
+
+Payments: Stripe or PayFast (for token purchases)
+
+AI Music Generator: OpenAI API or a custom AI model
+
+Location Services: Expo Location & Google Maps API
+
+QR Code Generator & Scanner: react-native-qrcode-svg + react-native-camera
+
+Push Notifications: Expo Notifications
+
+4. Monetization Plan
+Token Purchases: Users buy tokens to request and bid for songs.
+
+Merchandise Sales: T-shirts and caps with unique QR codes.
+
+Club Subscriptions: Charge clubs a monthly fee to use PlayMyJam.
+
+DJ Bookings: Charge a service fee when a DJ gets booked through the app.
+
+In-App Ads: Display ads for premium promotions and clubs.

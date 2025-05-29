@@ -1,0 +1,207 @@
+{
+  "expo": {
+    "name": "Smart Doctor",
+    "slug": "smartdoctor",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/logo.png",
+    "scheme": "smartdoctor",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "The Lifestyle needs access to your Camera to allow you to capture and share moments from your lifestyle activities. This includes taking photos and videos of events, live streaming, and participating in video calls with other users. By enabling camera access, you'll be able to document and share your experiences with the community, as well as engage in face-to-face interactions.",
+        "NSMicrophoneUsageDescription": "The Lifestyle needs access to your Microphone to enable voice notes and audio and video recording for your lifestyle posts and other activities.",
+        "NSPhotoLibraryUsageDescription": "Smart Doctor needs access to your Photo Library to let you select and upload photos related to your lifestyle.",
+        "NSLocationWhenInUseUsageDescription": "Smart Doctor needs access to your Location at all times to offer personalized services and recommendations. This includes helping you discover nearby models or service providers based on your preferences, connecting you with users in your vicinity, and ensuring accurate matching for activities and events. Continuous location access allows the app to provide tailored suggestions, optimize your experiences, and ensure you're always aware of what's happening around you, whether you're using the app or not.",
+        "NSUserNotificationUsageDescription": "Smart Doctor needs access to Notifications to keep you informed about new messages, new service requests."
+      },
+      "bitcode": false,
+      "bundleIdentifier": "com.smarthealthapp.api"
+    },
+    "android": {
+      "package": "com.smarthealthapp.api",
+      "notification": {
+        "icon": "./assets/images/logo.png"
+      },
+      "permissions": [
+        "CAMERA",
+        "WRITE_EXTERNAL_STORAGE",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "RECORD_VIDEO",
+        "RECORD_AUDIO",
+        "LOCATION",
+        "READ_EXTERNAL_STORAGE",
+        "NOTIFICATIONS",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_MEDIA_LOCATION",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.BIND_TELECOM_CONNECTION_SERVICE",
+        "android.permission.READ_PHONE_STATE",
+        "android.permission.CALL_PHONE",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.INTERNET",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.WAKE_LOCK",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ],
+      "versionCode": 10000,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/logo.png",
+        "backgroundColor": "#ffffff"
+      },
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAV7AyJHACZpiQwpTsof3siP4d25cU38Is"
+        }
+      },
+      "googleServicesFile": "./google-services.json"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      [
+        "onesignal-expo-plugin",
+        {
+          "mode": "development",
+          "smallIcons": [
+            "./assets/images/logo.png"
+          ],
+          "largeIcons": [
+            "./assets/images/logo.png"
+          ]
+        }
+      ],
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-7273251331335061~4202453362",
+          "iosAppId": "ca-app-pub-7273251331335061~4809397258"
+        }
+      ],
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/logo.png",
+          "imageWidth": 260,
+          "resizeMode": "contain",
+          "backgroundColor": "#222240",
+          "borderRadius": 50
+        }
+      ],
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "The Lifestyle needs access to your Camera to allow you to capture and share moments from your lifestyle activities. This includes taking photos and videos of events, live streaming, and participating in video calls with other users. By enabling camera access, you'll be able to document and share your experiences with the community, as well as engage in face-to-face interactions.",
+          "enableMicrophonePermission": true,
+          "microphonePermissionText": "The Lifestyle needs access to your Microphone to enable voice notes and audio and video recording for your lifestyle posts and other activities."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "The Lifestyle needs access to your Photo Library to let you select and upload photos related to your lifestyle activities.",
+          "savePhotosPermission": "The Lifestyle needs access to your device memory to save the Lifestyle based photos and videos",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
+      "expo-video",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "The Lifestyle needs access to your Location at all times to offer personalized services and recommendations. This includes helping you discover nearby models or service providers based on your preferences, connecting you with users in your vicinity, and ensuring accurate matching for activities and events. Continuous location access allows the app to provide tailored suggestions, optimize your experiences, and ensure you're always aware of what's happening around you, whether you're using the app or not."
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 24,
+            "usesCleartextTraffic": true,
+            "largeHeap": true
+          },
+          "ios": {
+            "deploymentTarget": "15.1"
+          }
+        }
+      ],
+      "@stream-io/video-react-native-sdk",
+      "@config-plugins/react-native-callkeep",
+      [
+        "@config-plugins/react-native-webrtc",
+        {
+          "cameraPermission": "Smart Doctor needs access to your Camera to allow you to capture and share moments from your lifestyle activities. This includes taking photos and videos of events, live streaming, and participating in video calls with other users. By enabling camera access, you'll be able to document and share your experiences with the community, as well as engage in face-to-face interactions.",
+          "microphonePermission": "Smart Doctor needs access to your Microphone to enable voice notes and both audio and video recording for your lifestyle posts and other activities. This includes recording voice messages, capturing high-quality audio for your video posts, and participating in audio or video calls with other users. Microphone access ensures that you can fully express yourself and communicate effectively within the app."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "oneSignalAppId": "e3e3f8d4-32c6-42dd-bc27-3145aad1017d",
+      "oneSignalRestApi": "os_v2_app_4pr7rvbsyzbn3pbhgfc2vuibpxhurzvha7nuzduo3iboh5jt3fy7vpaoljjsvp6fx5n37i5wz5xenymdwcl3v43zivzsnozihpg3uca",
+      "eas": {
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "targetName": "OneSignalNotificationServiceExtension",
+                  "bundleIdentifier": "playmyjam.empiredigitals.org.OneSignalNotificationServiceExtension",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.playmyjam.empiredigitals.org.onesignal"
+                    ]
+                  }
+                },
+                {
+                  "targetName": "OneSignalNotificationServiceExtension",
+                  "bundleIdentifier": "playmyjam.empiredigitals.org.OneSignalNotificationServiceExtension",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.playmyjam.empiredigitals.org.onesignal"
+                    ]
+                  }
+                },
+                {
+                  "targetName": "OneSignalNotificationServiceExtension",
+                  "bundleIdentifier": "com.smarthealthapp.api.OneSignalNotificationServiceExtension",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.com.smarthealthapp.api.onesignal"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "projectId": "6233b0ec-2409-49fb-99a6-d868fa49f177"
+      }
+    },
+    "owner": "empiredigitals",
+    "runtimeVersion": {
+      "policy": "nativeVersion"
+    }
+  }
+}
