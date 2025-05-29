@@ -83,7 +83,6 @@ useEffect(() => {
           headerStyle: {backgroundColor: colors?.green},
           headerTintColor: "#fff",
           headerTitleStyle: {fontFamily:'fontBold',fontSize:16},
-          //headerTitle:'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',
           headerTitle: () => <Image source={require('@/assets/images/smarttext.png')} style={{height:60,width:160,marginLeft:10}} resizeMode='contain' />,
         }}
       >
