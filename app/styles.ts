@@ -11,6 +11,7 @@ export const homeStyles = StyleSheet.create({
   safeArea: {
     flex: 1,
     paddingTop: 60, // Add space for the header
+    backgroundColor: 'transparent',
   },
   scrollContent: {
     paddingBottom: 30,

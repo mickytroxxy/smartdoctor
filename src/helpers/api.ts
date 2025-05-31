@@ -398,6 +398,120 @@ export const getAllPrescriptions = async (): Promise<Prescription[]> => {
   }
 };
 
+// Rating System Functions
+
+// Check if user can rate a doctor (has completed appointment)
+export const canUserRateDoctor = async (patientId: string, doctorId: string): Promise<boolean> => {
+  try {
+    const q = query(
+      collection(db, 'appointments'),
+      where('patientId', '==', patientId),
+      where('doctorId', '==', doctorId),
+      where('status', '==', 'completed')
+    );
+
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.length > 0;
+  } catch (error) {
+    console.error('Error checking if user can rate doctor:', error);
+    return false;
+  }
+};
+
+// Get user's existing rating for a doctor from doctor's ratings array
+export const getUserRatingForDoctor = async (patientId: string, doctorId: string): Promise<any | null> => {
+  try {
+    const doctorDoc = await getDoc(doc(db, 'users', doctorId));
+    if (doctorDoc.exists()) {
+      const doctorData = doctorDoc.data();
+      const ratings = doctorData.ratings || [];
+      const userRating = ratings.find((rating: any) => rating.raterId === patientId);
+      return userRating || null;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting user rating for doctor:', error);
+    return null;
+  }
+};
+
+// Submit or update a rating in doctor's ratings array
+export const submitRating = async (ratingData: {
+  patientId: string;
+  patientName: string;
+  doctorId: string;
+  rating: number;
+  comment: string;
+}): Promise<boolean> => {
+  try {
+    const doctorRef = doc(db, 'users', ratingData.doctorId);
+    const doctorDoc = await getDoc(doctorRef);
+
+    if (!doctorDoc.exists()) {
+      //console.error('Doctor not found');
+      return false;
+    }
+
+    const doctorData = doctorDoc.data();
+    let ratings = doctorData.ratings || [];
+
+    // Create new rating object
+    const newRating = {
+      raterId: ratingData.patientId,
+      raterName: ratingData.patientName,
+      rating: ratingData.rating,
+      message: ratingData.comment,
+      date: Date.now(),
+    };
+
+    // Check if user has already rated this doctor
+    const existingRatingIndex = ratings.findIndex((rating: any) => rating.raterId === ratingData.patientId);
+
+    if (existingRatingIndex !== -1) {
+      // Update existing rating
+      ratings[existingRatingIndex] = newRating;
+    } else {
+      // Add new rating
+      ratings.push(newRating);
+    }
+
+    // Calculate new average rating
+    const totalRating = ratings.reduce((sum: number, rating: any) => sum + rating.rating, 0);
+    const averageRating = totalRating / ratings.length;
+
+    // Update doctor document with new ratings array and calculated average
+    await updateDoc(doctorRef, {
+      ratings: ratings,
+      rating: {
+        average: Math.round(averageRating * 10) / 10, // Round to 1 decimal place
+        count: ratings.length
+      }
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Error submitting rating:', error);
+    return false;
+  }
+};
+
+// Get all ratings for a doctor from their ratings array
+export const getDoctorRatings = async (doctorId: string): Promise<any[]> => {
+  try {
+    const doctorDoc = await getDoc(doc(db, 'users', doctorId));
+    if (doctorDoc.exists()) {
+      const doctorData = doctorDoc.data();
+      const ratings = doctorData.ratings || [];
+      // Sort by date (newest first)
+      return ratings.sort((a: any, b: any) => b.date - a.date);
+    }
+    return [];
+  } catch (error) {
+    console.error('Error getting doctor ratings:', error);
+    return [];
+  }
+};
+
 // Update prescription
 export const updatePrescription = async (
   prescriptionId: string,

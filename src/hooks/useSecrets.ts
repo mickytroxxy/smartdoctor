@@ -1,7 +1,5 @@
 import {useSelector } from "react-redux";
 import { RootState } from "../state/store";
-import { useEffect } from "react";
-import { createData } from "../helpers/api";
 
 export const useSecrets = () => {
     const {secrets} = useSelector((state: RootState) => state.globalVariables);

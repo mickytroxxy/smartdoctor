@@ -17,7 +17,7 @@ export const Button: React.FC<ButtonProps> = memo((props) => {
 
   return (
     <TouchableOpacity onPress={handleBtnClick} style={[{ borderRadius: 5, padding: 15, borderColor: '#14678B', borderWidth: 0.7, flexDirection: 'row', width: '100%', marginTop: 10 }, btnInfo?.styles]}>
-      <Icon type={iconInfo.type} name={iconInfo.name} size={iconInfo.size} color={iconInfo.color} />
+      {iconInfo && <Icon type={iconInfo.type} name={iconInfo.name} size={iconInfo.size} color={iconInfo.color} />}
       <View style={{ marginLeft: 5, justifyContent: 'center' }}>
         <Text style={{ fontFamily: 'fontBold', color: textInfo?.color, fontSize: 11, textAlign: 'center' }} numberOfLines={1}>{textInfo?.text}</Text>
       </View>
@@ -29,10 +29,10 @@ export const LinearButton: React.FC<ButtonProps> = memo((props) => {
   const { btnInfo, textInfo, iconInfo, handleBtnClick } = props;
 
   return (
-    <LinearGradient colors={["#e44528","#63acfa","#f3bf4f"]} start={{ x: 0, y: 1 }} end={{ x: 1, y: 0 }} style={{padding:1.2,borderRadius:10}}>  
+    <LinearGradient colors={["#e44528","#63acfa","#f3bf4f"]} start={{ x: 0, y: 1 }} end={{ x: 1, y: 0 }} style={{padding:1.2,borderRadius:10}}>
       <TouchableOpacity onPress={handleBtnClick} style={{alignItems:'center',justifyContent:'center',backgroundColor:'#fff',borderRadius:10,display:'flex',flexDirection:'row',paddingVertical:16,paddingHorizontal:30}}>
         <Text style={{ fontFamily: 'fontBold', color: textInfo?.color, fontSize: 11, textAlign: 'center' }} numberOfLines={1}>{textInfo?.text } </Text>
-         <Icon type={iconInfo.type} name={iconInfo.name} size={iconInfo.size} color={iconInfo.color} />
+        {iconInfo && <Icon type={iconInfo.type} name={iconInfo.name} size={iconInfo.size} color={iconInfo.color} />}
       </TouchableOpacity>
     </LinearGradient>
   );
@@ -54,7 +54,7 @@ export const AddressButton: React.FC<AddressButtonProps> = memo((props) => {
   const {secrets} = useSecrets();
   const {location} = useLocation();
   const [searchLocation,setSearchLocation] = useState<LocationType>();
-  const [value,setValue] = useState('');  
+  const [value,setValue] = useState('');
   const handleChange = (field:string,value:LocationType) => {
     setSearchLocation(value)
     props.handleBtnClick(value);
@@ -111,7 +111,7 @@ export const DatePickerButton: React.FC<DateButtonProps> = memo((props) => {
   }
   return(
     <View>
-      {props?.placeholder === 'DATE OF BIRTH' ? 
+      {props?.placeholder === 'DATE OF BIRTH' ?
         <TouchableOpacity onPress={showModal}><Icon type='FontAwesome'  name="edit" color="#c5c3c8" size={24} /></TouchableOpacity>
         :
         <TouchableOpacity onPress={showModal} style={{backgroundColor : "#fff",width:'100%',borderRadius:10,padding:15,borderColor:'#a8a6a5',borderWidth:0.5,flexDirection:'row',justifyContent:'center',alignItems:'center'}}>

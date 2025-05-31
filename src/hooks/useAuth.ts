@@ -44,7 +44,6 @@ const useAuth = () => {
         if(formData.phoneNumber.length > 7){
             if(formData.password.length > 5){
                 const phoneNumber = phoneNoValidation(formData.phoneNumber,countryData?.dialCode);
-                console.log(phoneNumber);
                 if(phoneNumber){
                     updateLoadingState(true,'Authenticating you, please wait...')
                     const response = await loginApi(phoneNumber,formData.password);

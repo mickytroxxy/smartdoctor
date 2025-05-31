@@ -3,12 +3,14 @@ import { colors } from "@/constants/Colors";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import useDoctor from "@/src/hooks/useDoctor";
-import { currencyFormatter } from "@/src/helpers/methods";
+import { currencyFormatter, showToast } from "@/src/helpers/methods";
 import useAuth from "@/src/hooks/useAuth";
 import { LinearGradient } from "expo-linear-gradient";
 import { LinearButton } from "@/components/ui/Button";
 import { AppointmentType } from "@/constants/Types";
 import { Dropdown } from "@/components/ui/Dropdown";
+import useRating from "@/src/hooks/useRating";
+import RatingModal from "@/components/modals/RatingModal";
 
 // Appointment Type Selector Component
 const AppointmentTypeSelector = ({
@@ -563,10 +565,41 @@ const styles = StyleSheet.create({
   rateButton: {
     marginTop: 20,
   },
+  currentRatingContainer: {
+    marginBottom: 15,
+  },
+  userRatingContainer: {
+    backgroundColor: colors.faintGray,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 15,
+  },
+  userRatingText: {
+    fontSize: 14,
+    fontFamily: 'fontBold',
+    color: colors.primary,
+    marginBottom: 5,
+  },
+  userRatingComment: {
+    fontSize: 12,
+    fontFamily: 'fontLight',
+    color: colors.grey,
+    marginLeft: 8,
+    flex: 1,
+  },
+  cannotRateText: {
+    fontSize: 12,
+    fontFamily: 'fontLight',
+    color: colors.grey,
+    textAlign: 'center',
+    marginTop: 10,
+    fontStyle: 'italic',
+  },
 });
 
 export const DoctorProfile = () => {
-  const { activeUser } = useAuth();
+  const { activeUser, accountInfo } = useAuth();
+
   const {
     doctor,
     error,
@@ -581,8 +614,18 @@ export const DoctorProfile = () => {
     bookAppointmentCheckAsyc,
   } = useDoctor(activeUser?.userId || '');
 
+  // Rating functionality
+  const {
+    canRate,
+    userRating,
+    allRatings,
+    loading: ratingLoading,
+    submitting,
+    handleSubmitRating,
+  } = useRating(doctor?.userId || '');
+
+  const [showRatingModal, setShowRatingModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'about' | 'book'>(activeUser?.isAI ? 'about' : 'book');
-  const [rating, setRating] = useState<number>(0);
 
   // Define tabs using ES6 object literals
   const tabs = [
@@ -592,8 +635,11 @@ export const DoctorProfile = () => {
 
   // Use arrow function for event handler
   const handleRateDoctor = () => {
-    // This would be implemented to save the rating
-    console.log(`Rating doctor with ${rating} stars`);
+    if (canRate) {
+      setShowRatingModal(true);
+    } else {
+      showToast('You can only rate doctors after completing an appointment');
+    }
   };
 
   // Early return pattern for error handling
@@ -690,32 +736,78 @@ export const DoctorProfile = () => {
     </View>
   );
 
-  // Rating section
-  const ratingSection = (
+  // Rating section - Only show for patients
+  const ratingSection = !accountInfo?.isDoctor && (
     <View style={[styles.aboutContainer, { marginTop: 20 }]}>
       <Text style={styles.sectionTitle}>Rate Doctor</Text>
-      <View style={{ flexDirection: 'row', marginVertical: 10 }}>
-        {Array.from({ length: 5 }, (_, i) => i + 1).map(star => (
-          <TouchableOpacity
-            key={star}
-            onPress={() => setRating(star)}
-            style={{ marginRight: 8 }}
-          >
+
+      {/* Show current doctor rating */}
+      <View style={styles.currentRatingContainer}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+          {[1, 2, 3, 4, 5].map((star) => (
             <FontAwesome
-              name={rating >= star ? "star" : "star-o"}
-              size={30}
-              color={colors.orange}
+              key={star}
+              name={doctor.rating && star <= doctor.rating.average ? "star" : "star-o"}
+              size={20}
+              color="#FFD700"
+              style={{ marginRight: 2 }}
             />
-          </TouchableOpacity>
-        ))}
+          ))}
+          <Text style={styles.ratingText}>
+            {doctor.rating ? `${doctor.rating.average.toFixed(1)} (${doctor.rating.count} reviews)` : '0.0 (0 reviews)'}
+          </Text>
+        </View>
       </View>
+
+      {/* User's rating status */}
+      {userRating && (
+        <View style={styles.userRatingContainer}>
+          <Text style={styles.userRatingText}>Your Rating:</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <FontAwesome
+                key={star}
+                name={star <= userRating.rating ? "star" : "star-o"}
+                size={16}
+                color="#FFD700"
+                style={{ marginRight: 2 }}
+              />
+            ))}
+            <Text style={styles.userRatingComment}>"{userRating.message}"</Text>
+          </View>
+        </View>
+      )}
+
+      {/* Rating button */}
       <View style={styles.rateButton}>
         <LinearButton
           handleBtnClick={handleRateDoctor}
-          textInfo={{ text: "Submit Rating", color: colors.tertiary }}
-          iconInfo={{ type: "FontAwesome", name: "star", size: 20, color: colors.tertiary }}
+          textInfo={{
+            text: userRating ? "Update Rating" : "Rate Doctor",
+            color: canRate ? colors.tertiary : colors.grey
+          }}
+          iconInfo={{
+            type: "FontAwesome",
+            name: "star",
+            size: 20,
+            color: canRate ? colors.tertiary : colors.grey
+          }}
+          btnInfo={{
+            styles: {
+              backgroundColor: canRate ? colors.white : colors.faintGray,
+              borderColor: canRate ? colors.tertiary : colors.grey,
+              borderWidth: 1
+            }
+          }}
+          disabled={!canRate}
         />
       </View>
+
+      {!canRate && (
+        <Text style={styles.cannotRateText}>
+          Complete an appointment to rate this doctor
+        </Text>
+      )}
     </View>
   );
 
@@ -760,6 +852,16 @@ export const DoctorProfile = () => {
         {activeTab === 'about' ? aboutContent : bookingContent}
         {ratingSection}
       </ScrollView>
+
+      {/* Rating Modal */}
+      <RatingModal
+        visible={showRatingModal}
+        onClose={() => setShowRatingModal(false)}
+        onSubmit={handleSubmitRating}
+        doctorName={doctor?.fname || 'Doctor'}
+        existingRating={userRating ? { rating: userRating.rating, message: userRating.message } : null}
+        submitting={submitting}
+      />
     </View>
   );
 };

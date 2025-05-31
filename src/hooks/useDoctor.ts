@@ -56,7 +56,6 @@ const useDoctor = (doctorId: string) => {
   useEffect(() => {
     const fetchDoctor = async () => {
       const doctor = doctors.find(doctor => doctor.userId === doctorId);
-      console.log(doctor)
       if (doctor) {
         dispatch(setSelectedDoctor(doctor));
       } else {

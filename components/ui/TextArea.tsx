@@ -18,15 +18,15 @@ const TextArea: React.FC<TextAreaProps> = memo((props) => {
     <View style={[{ marginTop: 10, height:attr.multiline ? 120 : 55, backgroundColor:colors.white,borderRadius:attr.borderRadius || 10 }, style]}>
       <View style={[styles.searchInputHolder,{height:attr.multiline ? 120 : 55,borderRadius:attr.borderRadius || 10}]}>
         <View style={{ justifyContent: 'center', alignItems: 'center',marginLeft:10 }}>
-          <Icon name={attr.icon.name} type={attr.icon.type} color={attr.icon.color} size={24} />
+          {attr.icon && <Icon name={attr.icon.name} type={attr.icon.type} color={attr.icon.color} size={24} />}
         </View>
         <View style={{ justifyContent: 'center',marginLeft:5, flex:1 }}>
           <TextInput
             placeholder={attr.placeholder}
             autoCapitalize="none"
-            multiline={attr.multiline} 
-            maxLength={1200} 
-            numberOfLines={attr.multiline ? 10 : 1} 
+            multiline={attr.multiline}
+            maxLength={1200}
+            numberOfLines={attr.multiline ? 10 : 1}
             keyboardType={attr.keyboardType || undefined}
             editable={attr.editable !== undefined ? attr.editable : true}
             onChangeText={(val) => {
@@ -60,7 +60,7 @@ const TextArea: React.FC<TextAreaProps> = memo((props) => {
                 </View> :
 
                 <View>
-                  
+
                 </View>
               }
             </View>

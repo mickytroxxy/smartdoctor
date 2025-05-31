@@ -21,6 +21,7 @@ import { Prescription, getUserById } from '@/src/helpers/api';
 import { LinearButton } from '@/components/ui/Button';
 import * as Sharing from 'expo-sharing';
 import * as Print from 'expo-print';
+import { useSecrets } from '@/src/hooks/useSecrets';
 
 interface PrescriptionCardProps {
   prescription: Prescription;
@@ -34,7 +35,7 @@ const PrescriptionCard: React.FC<PrescriptionCardProps> = ({ prescription, onEdi
   const [doctorDetails, setDoctorDetails] = React.useState<any>(null);
   const [patientDetails, setPatientDetails] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(true);
-
+  const {secrets} = useSecrets();
   const statusColors = {
     pending: colors.orange,
     collected: colors.green,
@@ -69,7 +70,7 @@ const PrescriptionCard: React.FC<PrescriptionCardProps> = ({ prescription, onEdi
       const patientDetails = await getUserById(prescription.patientId);
 
       // Generate QR code URL using a free QR code API
-      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(prescription.id)}`;
+      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(secrets?.website + '/verify-prescription/' + prescription.id)}`;
 
       // Generate HTML content for the prescription
       const htmlContent = `
@@ -250,13 +251,13 @@ const PrescriptionCard: React.FC<PrescriptionCardProps> = ({ prescription, onEdi
               }}
               textInfo={{
                 text: 'Edit',
-                color: colors.white
+                color: colors.primary
               }}
               iconInfo={{
                 type: 'Ionicons',
                 name: 'create-outline',
                 size: 16,
-                color: colors.white
+                color: colors.primary
               }}
               handleBtnClick={() => onEdit && onEdit(prescription)}
             />
@@ -270,13 +271,13 @@ const PrescriptionCard: React.FC<PrescriptionCardProps> = ({ prescription, onEdi
             }}
             textInfo={{
               text: 'Download',
-              color: colors.white
+              color: colors.primary
             }}
             iconInfo={{
               type: 'Ionicons',
               name: 'download-outline',
               size: 16,
-              color: colors.white
+              color: colors.primary
             }}
             handleBtnClick={handleDownload}
           />

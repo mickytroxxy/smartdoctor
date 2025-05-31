@@ -1,11 +1,11 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack, useRouter } from 'expo-router';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-import { useColorScheme } from '@/hooks/useColorScheme';
+
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistor, RootState, store } from '@/src/state/store';
 import { Provider, useDispatch, useSelector } from 'react-redux';
@@ -17,7 +17,6 @@ import Loader from '@/components/ui/Loader';
 import { useOnesignal } from '@/src/hooks/useOnesignal';
 import { getSecretKeys } from '@/src/helpers/api';
 import { setSecrets } from '@/src/state/slices/globalVariables';
-import { useUpdates } from '@/hooks/useUpdates';
 import useAuth from '@/src/hooks/useAuth';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -25,7 +24,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     fontLight: require('../assets/fonts/MontserratAlternates-Light.otf'),
@@ -43,8 +41,16 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{flex:1}}>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <GestureHandlerRootView style={{flex:1, backgroundColor: colors.green}}>
+      <ThemeProvider value={{
+        ...DefaultTheme,
+        colors: {
+          ...DefaultTheme.colors,
+          background: colors.green,
+          card: colors.green,
+          primary: colors.primary,
+        }
+      }}>
       <PersistGate loading={null} persistor={persistor}>
         <Provider store={store}>
           <Main />
@@ -57,26 +63,26 @@ export default function RootLayout() {
 }
 
 const Main = () => {
-  const router = useRouter();
   const {} = useOnesignal();
   const {getUserDetails} = useAuth();
   const { isFetching } = useSelector((state: RootState) => state.modalState);
   const dispatch = useDispatch()
 
   useEffect(() => {
-    (async() =>{
-        const secrets = await getSecretKeys();
-        if(secrets?.length > 0){
+      (async() =>{
+          const secrets = await getSecretKeys();
+          if(secrets?.length > 0){
+            console.log(secrets[0])
             dispatch(setSecrets(secrets[0]))
-        }
-    })()
-},[])
+          }
+      })()
+  },[])
 
-useEffect(() => {
-  getUserDetails();
-},[])
+  useEffect(() => {
+    getUserDetails();
+  },[])
   return (
-    <View style={{flex:1}}>
+    <View style={{flex:1, backgroundColor: colors.green}}>
       <ConfirmDialog/>
       <Stack
         screenOptions={{
@@ -84,6 +90,7 @@ useEffect(() => {
           headerTintColor: "#fff",
           headerTitleStyle: {fontFamily:'fontBold',fontSize:16},
           headerTitle: () => <Image source={require('@/assets/images/smarttext.png')} style={{height:60,width:160,marginLeft:10}} resizeMode='contain' />,
+          contentStyle: { backgroundColor: colors.green },
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: true }} />

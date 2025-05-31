@@ -6,6 +6,7 @@ const initialState: {secrets:SecretsType} = {
     OPENAI_API:'',
     appleApproved:false,
     WHATSAPP:'',
+    baseUrl:'',
     SMS_AUTH:'',
     SMS_KEY:"",
     googleApiKey:'',
@@ -14,7 +15,9 @@ const initialState: {secrets:SecretsType} = {
     deliveryFee:200,
     appAccountId:'KH56461866',
     vatFee:0,
-    canSendSms:false
+    canSendSms:false,
+    commissionFee:15,
+    website:''
   }
 };
 

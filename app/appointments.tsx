@@ -7,7 +7,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import useAppointments from "@/src/hooks/useAppointments";
 import { useState } from "react";
 import { format } from "date-fns";
-import useAuth from "@/src/hooks/useAuth";
 // Import components from the new location
 import {
   AppointmentCard,
@@ -25,7 +24,6 @@ import {
 
 export default function AppointmentsScreen() {
   const router = useRouter();
-  const { accountInfo } = useAuth();
   const {
     appointments,
     selectedAppointment,
@@ -110,10 +108,10 @@ export default function AppointmentsScreen() {
       <SafeAreaView style={styles.safeArea}>
         <View>
           <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filterScrollContainer}
-        >
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filterScrollContainer}
+          >
           <FilterTabs
             activeFilter={filter}
             onFilterChange={setFilter}
@@ -169,6 +167,7 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
+    backgroundColor: 'transparent',
   },
   headerTitle: {
     fontSize: 20,

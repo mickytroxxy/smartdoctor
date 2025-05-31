@@ -1,20 +1,22 @@
-import { Platform, StyleSheet, Text } from "react-native";
-import { View } from "react-native";
-import React, { useCallback } from 'react'
-import { Bubble, Day, GiftedChat, InputToolbar, Send } from 'react-native-gifted-chat'
-import useChat from "@/src/hooks/useChat";
-import useAuth from "@/src/hooks/useAuth";
-import { TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import 'react-native-gesture-handler';
+import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
+import React, { useState, useCallback, useEffect } from 'react';
+import { GiftedChat, Bubble, Send, InputToolbar, Day, IMessage } from 'react-native-gifted-chat';
+import { LinearGradient } from 'expo-linear-gradient';
+import { colors } from '@/constants/Colors';
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Animatable from 'react-native-animatable';
-import { colors } from "@/constants/Colors";
-import { Stack, useRouter } from "expo-router";
+import { StatusBar } from 'expo-status-bar';
+import useAuth from '@/src/hooks/useAuth';
+import useChat from '@/src/hooks/useChat';
+import { GestureHandlerRootView, TouchableOpacity } from 'react-native-gesture-handler';
 
 export default function ChatScreen() {
-  const {accountInfo, activeUser} = useAuth();
+  const {activeUser, accountInfo} = useAuth();
   const router = useRouter();
-  const {messages, onSend, sendPhoto, isTyping, isOnline} = useChat();
-
+  const {messages,inputText,setInputText,isTyping,isOnline, onSend, sendPhoto} = useChat();
 
   const renderBubble = useCallback((props: any) => {
     const isUser = props.position === 'right';
@@ -124,7 +126,7 @@ export default function ChatScreen() {
           duration={500}
         >
           <Text style={styles.typingText}>
-            {activeUser?.fname }is typing...
+            Dr. Smith is typing
           </Text>
           <Animatable.View
             animation="bounce"
@@ -158,81 +160,100 @@ export default function ChatScreen() {
     </TouchableOpacity>
   ), [sendPhoto]);
 
-  return(
-    <View style={{flex:1,backgroundColor:colors.tertiary}}>
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          headerTitle: () => (
-            <View>
-              <Text style={styles.headerTitle}>{activeUser?.fname}</Text>
-              <View style={styles.onlineStatusContainer}>
-                <View style={[styles.onlineIndicator, { backgroundColor: isOnline ? '#4CAF50' : '#757575' }]} />
-                <Text style={styles.onlineStatusText}>{isOnline ? 'Online' : 'Offline'}</Text>
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <LinearGradient
+        colors={[colors.tertiary, colors.tertiary, colors.green]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={styles.container}
+      >
+        <StatusBar style="light" backgroundColor={colors.green} />
+        <Stack.Screen
+          options={{
+            headerShown: true,
+            headerTransparent: true,
+            headerTitle: () => (
+              <View style={styles.headerTitleContainer}>
+                <Text style={styles.headerTitle}>{activeUser?.fname}</Text>
+                <View style={styles.onlineStatusContainer}>
+                  <View style={[styles.onlineIndicator, { backgroundColor: isOnline ? '#4CAF50' : '#757575' }]} />
+                  <Text style={styles.onlineStatusText}>{isOnline ? 'Online' : 'Offline'}</Text>
+                </View>
               </View>
-            </View>
-          ),
-          headerTitleStyle: {
-            fontFamily: 'fontBold',
-            color: colors.white,
-            fontSize: 20
-          },
-          headerRight: () => (
-            <TouchableOpacity
-              //style={styles.backButton}
-              onPress={() => router.push(activeUser?.isAI ? '/AICall' : '/DoctorCall')}
-            >
-              <Ionicons name="call" size={24} color={colors.white} />
-            </TouchableOpacity>
-          ),
-        }}
-      />
-      <GiftedChat
-        messages={messages}
-        onSend={messages => onSend(messages)}
-        user={{
-          _id: accountInfo?.userId || 'user',
-          name: accountInfo?.fname || 'You',
-          avatar: accountInfo?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg',
-        }}
-        renderBubble={renderBubble}
-        renderSend={renderSend}
-        renderInputToolbar={renderInputToolbar}
-        renderDay={renderDay}
-        renderFooter={renderFooter}
-        alwaysShowSend
-        scrollToBottom
-        renderAvatar={null}
-        showUserAvatar={false}
-        showAvatarForEveryMessage={false}
-        inverted={true}
-
-        minInputToolbarHeight={60}
-        dateFormat="MMMM D, YYYY"
-        maxComposerHeight={100}
-        bottomOffset={Platform.OS === 'ios' ? 10 : 0}
-        messagesContainerStyle={{
-          paddingBottom: 10,
-        }}
-        timeTextStyle={{
-          right: { color: 'rgba(255, 255, 255, 0.7)', fontFamily: 'fontLight' },
-          left: { color: 'rgba(255, 255, 255, 0.7)', fontFamily: 'fontLight' }
-        }}
-        listViewProps={{
-          style: {
-            backgroundColor: 'transparent',
-          },
-          contentContainerStyle: {
-            paddingVertical: 10,
-          },
-          initialNumToRender: 10,
-          windowSize: 10,
-        }}
-        renderActions={renderActions}
-    />
-    </View>
-  )  
+            ),
+            headerTitleStyle: {
+              fontFamily: 'fontBold',
+              color: colors.white,
+              fontSize: 20
+            },
+            headerRight: () => (
+              <TouchableOpacity
+                //style={styles.backButton}
+                onPress={() => router.push(activeUser?.isAI ? '/AICall' : '/DoctorCall')}
+              >
+                <Ionicons name="call" size={24} color={colors.white} />
+              </TouchableOpacity>
+            ),
+          }}
+        />
+        <SafeAreaView style={styles.safeArea}>
+          <KeyboardAvoidingView
+            style={styles.chatContainer}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+          >
+            <GiftedChat
+              messages={messages}
+              text={inputText}
+              onInputTextChanged={setInputText}
+              onSend={onSend}
+              user={{
+                _id: accountInfo?.userId || 'user',
+                name: accountInfo?.fname || 'You',
+                avatar: accountInfo?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg',
+              }}
+              renderBubble={renderBubble}
+              renderSend={renderSend}
+              renderInputToolbar={renderInputToolbar}
+              renderDay={renderDay}
+              renderFooter={renderFooter}
+              alwaysShowSend
+              scrollToBottom
+              renderAvatar={null}
+              showUserAvatar={false}
+              showAvatarForEveryMessage={false}
+              inverted={true}
+              minInputToolbarHeight={60}
+              dateFormat="MMMM D, YYYY"
+              maxComposerHeight={100}
+              bottomOffset={Platform.OS === 'ios' ? 10 : 0}
+              messagesContainerStyle={{
+                paddingBottom: 10,
+              }}
+              timeTextStyle={{
+                right: { color: 'rgba(255, 255, 255, 0.7)', fontFamily: 'fontLight' },
+                left: { color: 'rgba(255, 255, 255, 0.7)', fontFamily: 'fontLight' }
+              }}
+              listViewProps={{
+                style: {
+                  backgroundColor: 'transparent',
+                },
+                contentContainerStyle: {
+                  paddingVertical: 10,
+                },
+                initialNumToRender: 10,
+                windowSize: 10,
+              }}
+              renderActions={renderActions}
+            />
+          </KeyboardAvoidingView>
+        </SafeAreaView>
+      </LinearGradient>
+    </GestureHandlerRootView>
+  );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -240,6 +261,9 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     paddingTop: 60, // Add space for the header
+  },
+  headerTitleContainer: {
+    marginLeft:10
   },
   headerTitle: {
     fontSize: 18,

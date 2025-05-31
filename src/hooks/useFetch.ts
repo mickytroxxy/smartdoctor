@@ -1,13 +1,14 @@
 import axios from 'axios';
-
-const BASE_URL = 'http://192.168.18.229:3000';
+import { useSecrets } from './useSecrets';
 
 type FetchDataTypes = {endPoint: string; method: 'POST' | 'GET' | 'UPDATE' | 'DELETE'; data?: any;};
 
 const useFetch = () => {
+    const {secrets} = useSecrets();
     const fetchData = async ({ endPoint, method, data }: FetchDataTypes) => {
         try {
-            const url = BASE_URL + endPoint;
+            const url = secrets?.baseUrl + endPoint;
+            console.log(url)
             let response = await axios({method, url, data});
             return response.data;
         } catch (error) {

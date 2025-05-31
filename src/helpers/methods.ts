@@ -296,7 +296,6 @@ export const PREVIEW_RECT = {
 
 export const detectFaces = (result: any,detections:any[],currentIndexRef:any, instructions:any, setInstructions:any, handleIndex:any) => {
   const currentDetection = detections[currentIndexRef.current < 5 ? currentIndexRef.current : 4];
-  console.log(result)
   if (result.faces.length !== 1) {
     currentIndexRef.current = 0;
     setInstructions({ status: false, text: 'Position your face in the circle and then' })

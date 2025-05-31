@@ -26,7 +26,6 @@ const Location = memo((props:any) => {
         if(key_word.length > 2){
             const {latitude,longitude} = locationWithText;
             axios.request({method: 'post',url: `https://maps.googleapis.com/maps/api/place/autocomplete/json?key=${secrets.googleApiKey}&input=${key_word}&location=${latitude},${longitude}&radius=1000000`}).then((response) => {
-                console.log(response)
                 setPredictions({...predictions, predictionsArray:response.data.predictions,showPredictions:true});
             }).catch((e) => {
                 console.log(e)

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, StyleSheet, Text, View } from "react-native";
+import {StyleSheet, Text, View } from "react-native";
 import {
   Call,
   HangUpCallButton,
@@ -52,11 +52,13 @@ function AICall() {
     setStatus("start");
     router.back();
   };
+
   useEffect(() => {
     if(status === 'start'){
         handleJoin();
     }
-  },[])
+  },[]);
+
   return (
     <GestureHandlerRootView>
       <View style={styles.container}>

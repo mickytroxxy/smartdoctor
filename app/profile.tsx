@@ -35,15 +35,15 @@ export default function ProfileScreen() {
   };
 
   return (
-    <ThemedView style={{ flex: 1 }}>
+    <ThemedView style={{ flex: 1, backgroundColor: colors.green }}>
        <Stack.Screen options={{
           headerShown:true,
           headerRight: () => (profileOwner ? <TouchableOpacity onPress={logOut} style={{}}><Icon type="FontAwesome" name="sign-out" size={40} color={colors.tomato} /></TouchableOpacity> : null)
         }} />
       <ParallaxScrollView
-        headerBackgroundColor={{ light: '#000', dark: '#000' }}
+        headerBackgroundColor={{ light: colors.green, dark: colors.green }}
         headerImage={
-          <View onLayout={handleLayout} style={{ flex: 1 }}>
+          <View onLayout={handleLayout} style={{ flex: 1, backgroundColor: colors.green }}>
             <HeaderSection />
           </View>
         }

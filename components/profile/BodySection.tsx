@@ -17,7 +17,7 @@ export default function BodySection() {
     const {accountInfo, profileOwner, activeUser} = useAuth();
     const [showEditAddress, setShowEditAddress] = useState(false);
     const [showDoctorDialog, setShowDoctorDialog] = useState(false);
-
+    
     return (
         <View style={{flex:1,paddingBottom:30}}>
             <View style={styles.ProfileFooterHeader}>
@@ -38,7 +38,7 @@ export default function BodySection() {
             {showEditAddress &&
                 <AddressButton handleBtnClick={(address:LocationType) => handleChange('address',address)} />
             }
-            {(profileOwner && accountInfo?.isDoctor) &&
+            {(profileOwner && !accountInfo?.isDoctor) &&
                 <View style={{marginTop:12,gap:12}}>
                     <Text style={{fontFamily:'fontBold',color:colors.tertiary,fontSize:12}}>For Healthcare Professionals</Text>
                     <ProfileBtn headerText="Join as a Doctor" subText="Register your practice and connect with patients" onPress={() => setShowDoctorDialog(true)} />

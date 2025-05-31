@@ -25,14 +25,13 @@ export type DoctorAvailability = {
 export type DoctorRating = {
   average: number; // 1-5 scale
   count: number; // Number of ratings
-  reviews?: DoctorReview[];
 };
 
 export type DoctorReview = {
-  userId: string;
-  userName: string;
+  raterId: string;
+  raterName: string;
   rating: number;
-  comment: string;
+  message: string;
   date: number; // timestamp
 };
 
@@ -70,6 +69,7 @@ export interface PlayMyJamProfile {
   certifications?: string[];
   availability?: DoctorAvailability;
   rating?: DoctorRating;
+  ratings?: DoctorReview[]; // Array of individual ratings
   fees?: number;
   supportsHomeVisit?: boolean;
   homeVisitFee?: number;
@@ -163,6 +163,9 @@ export type LocationInputProps = {
 
 export interface SecretsType {
   OPENAI_API: string;
+  commissionFee:number;
+  website:string;
+  baseUrl:string;
   appAccountId:string;
   appleApproved:boolean;
   WHATSAPP: string;

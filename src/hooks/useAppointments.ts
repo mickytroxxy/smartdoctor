@@ -22,6 +22,9 @@ import { useRouter } from 'expo-router';
 import { showToast } from '../helpers/methods';
 import { Prescription } from '../helpers/api';
 import { setActiveUser } from '../state/slices/accountInfo';
+import useUpdates from './useUpdates';
+import { useSecrets } from './useSecrets';
+import { setModalState } from '../state/slices/modalState';
 
 const useAppointments = () => {
   const dispatch = useDispatch();
@@ -33,6 +36,10 @@ const useAppointments = () => {
     loading,
     error
   } = useSelector((state: RootState) => state.appointmentSlice);
+
+  // Payment handling hooks
+  const { handleTransaction } = useUpdates();
+  const { secrets } = useSecrets();
 
   const [filter, setFilter] = useState<AppointmentStatus | 'all'>('all');
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
@@ -116,6 +123,9 @@ const useAppointments = () => {
         const updatedAppointment = appointments.find(a => a.id === appointmentId);
 
         if (updatedAppointment) {
+          // Handle payment logic based on status change
+          await handlePaymentLogic(updatedAppointment, status);
+
           const updated = { ...updatedAppointment, status, notes: notes || updatedAppointment.notes };
           dispatch(updateAppointment(updated));
 
@@ -134,7 +144,60 @@ const useAppointments = () => {
     } finally {
       dispatch(setLoading(false));
     }
-  }, [dispatch, appointments, selectedAppointment, fetchAppointments]);
+  }, [dispatch, appointments, selectedAppointment, fetchAppointments, handleTransaction, secrets]);
+
+  // Handle payment logic for appointment status changes
+  const handlePaymentLogic = useCallback(async (
+    appointment: Appointment,
+    newStatus: AppointmentStatus
+  ) => {
+    // Only process payments for card payments
+    if (appointment.paymentMethod !== 'card') {
+      return;
+    }
+
+    const appAccountId = secrets?.appAccountId;
+    const commissionFee = secrets?.commissionFee || 15;
+
+    if (!appAccountId) {
+      console.error('App account ID not found');
+      return;
+    }
+
+    try {
+      if (newStatus === 'cancelled' && accountInfo?.isDoctor) {
+        // Doctor cancelled - refund full amount to patient
+        await handleTransaction({
+          amount: appointment.fee,
+          receiver: appointment.patientId,
+          sender: appAccountId,
+          msg: 'Appointment cancelled - full refund processed',
+          type: 'transfer',
+          description: `Refund for cancelled appointment with Dr. ${appointment.doctorName}`,
+          createStatement: true
+        });
+        dispatch(setModalState({isVisible:true,attr:{headerText:'SUCCESS STATUS',message:'Patient refunded successfully',status:true}}));
+      } else if (newStatus === 'completed' && accountInfo?.isDoctor) {
+        // Doctor completed appointment - transfer commission-adjusted amount to doctor
+        const commissionAmount = (appointment.fee * commissionFee) / 100;
+        const doctorAmount = appointment.fee - commissionAmount;
+
+        await handleTransaction({
+          amount: doctorAmount,
+          receiver: appointment.doctorId,
+          sender: appAccountId,
+          msg: `Payment for completed appointment with ${appointment.patientName}`,
+          type: 'transfer',
+          description: `Appointment fee`,
+          createStatement: true
+        });
+        dispatch(setModalState({isVisible:true,attr:{headerText:'SUCCESS STATUS',message:`Payment of R${doctorAmount.toFixed(2)} transferred to your account`,status:true}}));
+      }
+    } catch (error) {
+      console.error('Payment processing error:', error);
+      showToast('Payment processing failed');
+    }
+  }, [handleTransaction, secrets, accountInfo]);
 
   // Handle appointment rescheduling
   const handleReschedule = useCallback(async (

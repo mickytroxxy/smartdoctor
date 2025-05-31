@@ -1,7 +1,5 @@
 import { Call, StreamVideoClient } from "@stream-io/video-react-native-sdk";
-import { useEffect } from "react";
-import useAuth from "./useAuth";
-import useFetch from "./useFetch";
+import { useSecrets } from "./useSecrets";
 
 interface CallCredentials {
   apiKey: string;
@@ -10,8 +8,8 @@ interface CallCredentials {
   callId: string;
   userId: string;
 }
-const baseUrl = "http://192.168.18.229:3000";
 export const useAICall = () => {
+    const {secrets} = useSecrets();
     async function joinCall(credentials: CallCredentials): Promise<[client: StreamVideoClient, call: Call]> {
         const client = new StreamVideoClient({
             apiKey: credentials.apiKey,
@@ -33,7 +31,7 @@ export const useAICall = () => {
     }
     
     async function connectAgent(call: Call) {
-        const res = await fetch(`${baseUrl}/${call.type}/${call.id}/connect`, {
+        const res = await fetch(`${secrets?.baseUrl}/${call.type}/${call.id}/${secrets.OPENAI_API}/connect`, {
             method: "POST",
         });
         
