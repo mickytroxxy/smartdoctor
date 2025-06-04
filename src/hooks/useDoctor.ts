@@ -6,7 +6,7 @@ import {
   setBookingStatus,
   addAppointment
 } from '../state/slices/appointmentSlice';
-import { bookAppointment } from '../helpers/api';
+import { bookAppointment, getUserById } from '../helpers/api';
 import { useRouter } from 'expo-router';
 import { currencyFormatter, showToast } from '../helpers/methods';
 import { AppointmentStatus, AppointmentType, PlayMyJamProfile } from '@/constants/Types';
@@ -17,9 +17,10 @@ import { useSecrets } from './useSecrets';
 import { setCallback } from '../state/slices/camera';
 import { setConfirmDialog } from '../state/slices/ConfirmDialog';
 import { setModalState } from '../state/slices/modalState';
+import { sendNotification } from './useOnesignal';
 
 
-const useDoctor = (doctorId: string) => {
+const useDoctor = (doctorId: string, medicalHistoryAttached: boolean = false) => {
   const dispatch = useDispatch();
   const router = useRouter();
   const { accountInfo } = useSelector((state: RootState) => state.accountSlice);
@@ -34,6 +35,42 @@ const useDoctor = (doctorId: string) => {
   const [symptoms, setSymptoms] = useState('');
   const [notes, setNotes] = useState('');
   const {secrets} = useSecrets();
+
+  // Helper function to send notification to doctor
+  const sendNotificationToDoctor = useCallback(async (
+    title: string,
+    body: string,
+    data: any = {}
+  ) => {
+    try {
+      if (selectedDoctor?.userId) {
+        const doctorData = await getUserById(selectedDoctor.userId);
+        if (doctorData?.notificationToken && !doctorData.notificationToken.startsWith("ExponentPushToken")) {
+          await sendNotification([doctorData.notificationToken], title, body, data);
+        }
+      }
+    } catch (error) {
+      console.error('Error sending notification to doctor:', error);
+    }
+  }, [selectedDoctor]);
+
+  // Helper function to send notification to patient
+  const sendNotificationToPatient = useCallback(async (
+    title: string,
+    body: string,
+    data: any = {}
+  ) => {
+    try {
+      if (accountInfo?.userId) {
+        const patientData = await getUserById(accountInfo.userId);
+        if (patientData?.notificationToken && !patientData.notificationToken.startsWith("ExponentPushToken")) {
+          await sendNotification([patientData.notificationToken], title, body, data);
+        }
+      }
+    } catch (error) {
+      console.error('Error sending notification to patient:', error);
+    }
+  }, [accountInfo]);
   const [paymentMethods, setPaymentMethods] = useState<ItemListType[]>([
     { id: 'cash', label: 'Cash Payment', selected: true, subtitle: 'Pay at the clinic' },
     { id: 'card', label: 'Card Payment', selected: false, subtitle: 'Pay with account balance' }
@@ -60,7 +97,6 @@ const useDoctor = (doctorId: string) => {
         dispatch(setSelectedDoctor(doctor));
       } else {
         setError('Doctor not found');
-        showToast('Doctor not found ');
       }
     };
 
@@ -91,6 +127,7 @@ const useDoctor = (doctorId: string) => {
           type: appointmentType,
           symptoms,
           notes,
+          medicalHistoryAttached,
           fee: appointmentType === 'home' && selectedDoctor?.supportsHomeVisit
             ? (selectedDoctor.fees || 0) + (selectedDoctor.homeVisitFee || 0)
             : (selectedDoctor?.fees || 0),
@@ -109,6 +146,21 @@ const useDoctor = (doctorId: string) => {
           dispatch(addAppointment(appointment));
           dispatch(setBookingStatus('success'));
           dispatch(setModalState({isVisible:true,attr:{headerText:'SUCCESS STATUS',message:'Your booking was successful',status:true}}));
+
+          // Send notification to doctor about new appointment
+          const medicalHistoryNote = medicalHistoryAttached ? ' with medical history attached' : '';
+          await sendNotificationToDoctor(
+            'New Appointment Booking',
+            `${accountInfo?.fname || 'A patient'} has booked a ${appointmentType} appointment for ${appointmentDate} at ${appointmentTime}${medicalHistoryNote}`,
+            {
+              type: 'appointment_booking',
+              appointmentId: appointment.id,
+              patientId: accountInfo?.userId,
+              patientName: accountInfo?.fname,
+              medicalHistoryAttached: medicalHistoryAttached
+            }
+          );
+
           router.push('/appointments');
         } else {
           dispatch(setBookingStatus('error'));

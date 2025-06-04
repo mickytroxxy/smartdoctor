@@ -11,12 +11,16 @@ import { ProfileBtn } from "./components/ProfileBtn";
 import { usePhotos } from "@/src/hooks/usePhotos";
 import RegisterDocScreen from "./components/Register";
 import { DoctorProfile } from "./components/DoctorProfile";
+import useMedicalHistory from "@/src/hooks/useMedicalHistory";
+import { useRouter } from "expo-router";
 
 export default function BodySection() {
     const {handleChange} = usePhotos();
     const {accountInfo, profileOwner, activeUser} = useAuth();
     const [showEditAddress, setShowEditAddress] = useState(false);
     const [showDoctorDialog, setShowDoctorDialog] = useState(false);
+    const { isHistoryComplete } = useMedicalHistory();
+    const router = useRouter();
     
     return (
         <View style={{flex:1,paddingBottom:30}}>
@@ -27,6 +31,17 @@ export default function BodySection() {
             </View>
 
             <Stats/>
+
+            {/* Medical History Button - Only for profile owner and non-AI users */}
+            {(profileOwner && !activeUser?.isAI) && (
+                <View style={{marginTop:12,gap:12}}>
+                    <ProfileBtn
+                        headerText="Medical History"
+                        subText={isHistoryComplete ? "View and update your medical information" : "Complete your medical history for better care"}
+                        onPress={() => router.push('/medical-history')}
+                    />
+                </View>
+            )}
             <View style={{marginTop:12,gap:12}}><Photos/></View>
             {!activeUser?.isAI &&
                 <View style={{marginTop:12,gap:12,flexDirection:'row'}}>

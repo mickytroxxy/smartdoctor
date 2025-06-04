@@ -4,6 +4,9 @@ import { OneSignal } from 'react-native-onesignal';
 import useAuth from './useAuth';
 import { updateData } from '../helpers/api';
 
+const oneSignalRestApi = 'os_v2_app_odec2xytqnanhboklofozdqqmgogserjghquk6uxvob2bvmcocekadwzl5wjcu7d7ggt6bsw3pwaqkooblhbsdby3jbqkton65dddni';
+const oneSignalAppId = "70c82d5f-1383-40d3-85ca-5b8aec8e1061";
+
 export const getOneSignalTokens = (users:any,clientId:string) => {
     if(users.length > 0){
         let notificationTokens = users.filter((user:any) => 
@@ -19,22 +22,43 @@ export const getOneSignalTokens = (users:any,clientId:string) => {
 export const sendNotification = async (to:string[],title:string,body:string,data = {}) => {
     try {
         const response = await axios.post('https://api.onesignal.com/notifications',{
-            app_id: "e3e3f8d4-32c6-42dd-bc27-3145aad1017d",
-            name: { en: "My notification Name" },
+            app_id: oneSignalAppId,
+            name: { en: "PlayMyJam notification" },
             contents: { en: body },
             headings: { en: title },
             include_subscription_ids: to,
             data,
-            small_icon: "notification"
+            small_icon: "logo"
         },{
             headers: {
                 'Content-Type': 'application/json; charset=utf-8',
-                'Authorization': 'Basic os_v2_app_4pr7rvbsyzbn3pbhgfc2vuibpxhurzvha7nuzduo3iboh5jt3fy7vpaoljjsvp6fx5n37i5wz5xenymdwcl3v43zivzsnozihpg3uca', // Replace with your REST API Key
+                'Authorization': 'Basic ' + oneSignalRestApi
             },
         });
         console.log('Notification sent successfullyl:', response.data);
-    } catch (error) {
-        console.error('Error sending notification:',error);
+    } catch (error:any) {
+        console.error('Error sending notification:', error);
+        if (error.response) {
+            console.error('Response status:', error.response.status);
+            console.error('Response data:', JSON.stringify(error.response.data, null, 2));
+            console.error('Response headers:', error.response.headers);
+
+            // Log specific OneSignal error details
+            if (error.response.data && error.response.data.errors) {
+                console.error('OneSignal specific errors:', error.response.data.errors);
+            }
+        } else if (error.request) {
+            console.error('No response received:', error.request);
+        } else {
+            console.error('Error setting up request:', error.message);
+        }
+
+        // Create a more descriptive error message
+        const errorMessage = error.response?.data?.errors
+            ? `OneSignal API Error: ${JSON.stringify(error.response.data.errors)}`
+            : `Network Error: ${error.message}`;
+
+        throw new Error(errorMessage);
     }
 };
 export const useOnesignal = () => {
@@ -42,14 +66,14 @@ export const useOnesignal = () => {
     const oneSignalInit = async () => {
         const token = await OneSignal.User.pushSubscription.getIdAsync();
         console.log(token)
-        sendNotification([token || ''],'Just a test','Wow there noti',{})
+        sendNotification([token || ''],'Just a test','Wow there notilol',{})
         if (token) {
             updateData("users", accountInfo?.userId as any, { value: token, field: 'notificationToken' });
         }
     }
     
     useEffect(() => {
-        OneSignal.initialize("99a54984-3b0e-4897-9b70-8ce6303260fc");
+        OneSignal.initialize(oneSignalAppId);
         OneSignal.Notifications.requestPermission(true);
         oneSignalInit();
     },[])

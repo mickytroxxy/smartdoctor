@@ -16,6 +16,36 @@ export const homeStyles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 30,
   },
+  headerButtonsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 15,
+  },
+  headerButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  messageBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    backgroundColor: colors.tomato,
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  messageBadgeText: {
+    fontSize: 12,
+    fontFamily: 'fontBold',
+    color: colors.white,
+  },
   profileButton: {
     marginRight: 0,
   },
@@ -121,23 +151,20 @@ export const homeStyles = StyleSheet.create({
   specialtyItem: {
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 7,
+    backgroundColor: colors.green + 30,
     marginRight: 10,
-    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-    borderWidth:1,
-    borderColor:colors.green
   },
   specialtyItemSelected: {
     backgroundColor: colors.white,
   },
   specialtyText: {
     color: colors.white,
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: 'fontLight',
   },
   specialtyTextSelected: {

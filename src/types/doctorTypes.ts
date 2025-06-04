@@ -89,6 +89,7 @@ export interface Appointment {
   notes: string;
   fee: number;
   paymentMethod: 'cash' | 'card';
+  medicalHistoryAttached: boolean;
   location?: {
     text: string;
     latitude: number;

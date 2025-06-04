@@ -4,8 +4,9 @@ import { RootState } from '../state/store';
 import axios from 'axios';
 import { useSecrets } from './useSecrets';
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
-import { createData, getAllMessages, getMessages, uploadFile } from '../helpers/api';
+import { createData, getAllMessages, getMessages, uploadFile, getUserById } from '../helpers/api';
 import { usePhotos } from './usePhotos';
+import { sendNotification } from './useOnesignal';
 
 const useChat = () => {
   const { secrets } = useSecrets();
@@ -17,6 +18,40 @@ const useChat = () => {
   const connectionId = `chat-${accountInfo?.userId}-${activeUser?.userId}`;
   const reversedConnectionId = `chat-${activeUser?.userId}-${accountInfo?.userId}`;
   const {handleGetPhotos} = usePhotos();
+
+  // Helper function to send notification to recipient
+  const sendMessageNotification = useCallback(async (
+    recipientId: string,
+    senderName: string,
+    messageText: string,
+    isImage: boolean = false
+  ) => {
+    try {
+      // Don't send notifications to AI users
+      if (activeUser?.isAI) return;
+
+      const userData = await getUserById(recipientId);
+      if (userData?.notificationToken && !userData.notificationToken.startsWith("ExponentPushToken")) {
+        const notificationBody = isImage
+          ? `${senderName} sent you an image`
+          : `${senderName}: ${messageText.length > 50 ? messageText.substring(0, 50) + '...' : messageText}`;
+
+        await sendNotification(
+          [userData.notificationToken],
+          'New Message',
+          notificationBody,
+          {
+            type: 'new_message',
+            senderId: accountInfo?.userId,
+            senderName: senderName,
+            chatId: connectionId
+          }
+        );
+      }
+    } catch (error) {
+      console.error('Error sending message notification:', error);
+    }
+  }, [accountInfo, activeUser, connectionId]);
 
   const generateAiMessages = useCallback((messages: any[], cb: (response: string | boolean) => void) => {
     try {
@@ -62,7 +97,18 @@ const useChat = () => {
       },
     }
     await createData('chat',messageId,{...messageObj,participants:[connectionId,reversedConnectionId]});
-  },[])
+
+    // Send notification to recipient if sender is current user
+    if (sender === accountInfo?.userId && activeUser?.userId) {
+      const senderName = accountInfo?.isDoctor ? `Dr. ${accountInfo.fname}` : accountInfo?.fname || 'Someone';
+      await sendMessageNotification(
+        activeUser.userId,
+        senderName,
+        body,
+        !!imageUrl
+      );
+    }
+  },[accountInfo, activeUser, connectionId, reversedConnectionId, sendMessageNotification])
 
   const onSend = useCallback(async(newMessages: IMessage[] = []) => {
     sendMessage(accountInfo?.userId || '', newMessages[0].text);

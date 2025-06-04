@@ -22,6 +22,7 @@ import { useRouter } from 'expo-router';
 import { showToast } from '../helpers/methods';
 import { Prescription } from '../helpers/api';
 import { setActiveUser } from '../state/slices/accountInfo';
+import { sendNotification } from './useOnesignal';
 import useUpdates from './useUpdates';
 import { useSecrets } from './useSecrets';
 import { setModalState } from '../state/slices/modalState';
@@ -50,6 +51,23 @@ const useAppointments = () => {
     medications: [{ name: '', dosage: '', frequency: '', duration: '', notes: '' }],
     instructions: ''
   });
+
+  // Helper function to send notification to user
+  const sendNotificationToUser = useCallback(async (
+    userId: string,
+    title: string,
+    body: string,
+    data: any = {}
+  ) => {
+    try {
+      const userData = await getUserById(userId);
+      if (userData?.notificationToken && !userData.notificationToken.startsWith("ExponentPushToken")) {
+        await sendNotification([userData.notificationToken], title, body, data);
+      }
+    } catch (error) {
+      console.error('Error sending notification to user:', error);
+    }
+  }, []);
 
   // Fetch appointments on component mount
   useEffect(() => {
@@ -131,6 +149,43 @@ const useAppointments = () => {
 
           if (selectedAppointment?.id === appointmentId) {
             dispatch(setSelectedAppointment(updated));
+          }
+
+          // Send notification to the other party about status change
+          const recipientId = accountInfo?.isDoctor ? updatedAppointment.patientId : updatedAppointment.doctorId;
+          const recipientName = accountInfo?.isDoctor ? updatedAppointment.patientName : updatedAppointment.doctorName;
+          const senderName = accountInfo?.isDoctor ? `Dr. ${accountInfo.fname}` : accountInfo?.fname;
+
+          let notificationTitle = '';
+          let notificationBody = '';
+
+          switch (status) {
+            case 'confirmed':
+              notificationTitle = 'Appointment Confirmed';
+              notificationBody = `Your appointment with ${senderName} has been confirmed for ${updatedAppointment.date} at ${updatedAppointment.time}`;
+              break;
+            case 'cancelled':
+              notificationTitle = 'Appointment Cancelled';
+              notificationBody = `Your appointment with ${senderName} has been cancelled`;
+              break;
+            case 'completed':
+              notificationTitle = 'Appointment Completed';
+              notificationBody = `Your appointment with ${senderName} has been completed`;
+              break;
+          }
+
+          if (notificationTitle && recipientId) {
+            await sendNotificationToUser(
+              recipientId,
+              notificationTitle,
+              notificationBody,
+              {
+                type: 'appointment_status_update',
+                appointmentId: appointmentId,
+                status: status,
+                senderName: senderName
+              }
+            );
           }
 
           showToast(`Appointment ${status}`);
@@ -228,6 +283,25 @@ const useAppointments = () => {
             dispatch(setSelectedAppointment(updated));
           }
 
+          // Send notification to the other party about rescheduling
+          const recipientId = accountInfo?.isDoctor ? updatedAppointment.patientId : updatedAppointment.doctorId;
+          const senderName = accountInfo?.isDoctor ? `Dr. ${accountInfo.fname}` : accountInfo?.fname;
+
+          if (recipientId) {
+            await sendNotificationToUser(
+              recipientId,
+              'Appointment Rescheduled',
+              `Your appointment with ${senderName} has been rescheduled to ${newDate} at ${newTime}`,
+              {
+                type: 'appointment_reschedule',
+                appointmentId: appointmentId,
+                newDate: newDate,
+                newTime: newTime,
+                senderName: senderName
+              }
+            );
+          }
+
           showToast('Appointment rescheduled successfully');
           fetchAppointments(); // Refresh the list
         }
@@ -283,6 +357,19 @@ const useAppointments = () => {
 
         // Add the new prescription to the list
         setPrescriptions(prev => [result, ...prev]);
+
+        // Send notification to patient about new prescription
+        await sendNotificationToUser(
+          selectedAppointment.patientId,
+          'New Prescription Available',
+          `Dr. ${selectedAppointment.doctorName} has created a new prescription for you`,
+          {
+            type: 'prescription_created',
+            prescriptionId: result.id,
+            appointmentId: selectedAppointment.id,
+            doctorName: selectedAppointment.doctorName
+          }
+        );
 
         // Reset the form
         setNewPrescription({

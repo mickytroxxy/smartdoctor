@@ -30,6 +30,7 @@ export const Dropdown = ({ onChange, itemList, placeholder, isSearch }: Dropdown
         <View>
             <TouchableOpacity
                 onPress={() => setIsCollapsed(!isCollapsed)}
+                activeOpacity={0.7}
                 style={{
                     borderRadius: 10,
                     flexDirection: 'row',
@@ -40,7 +41,8 @@ export const Dropdown = ({ onChange, itemList, placeholder, isSearch }: Dropdown
                     borderBottomRightRadius: isCollapsed ? 0 : 10,
                     height: 60,
                     zIndex: 10,
-                    backgroundColor:colors.white
+                    backgroundColor: colors.white,
+                    alignItems: 'center'
                 }}
             >
                 <View style={{ flex: 1, justifyContent: 'center' }}>
@@ -102,12 +104,15 @@ export const Dropdown = ({ onChange, itemList, placeholder, isSearch }: Dropdown
                                 onChange(item);
                                 setIsCollapsed(false);
                             }}
+                            activeOpacity={0.7}
                             style={{
                                 borderBottomWidth: i !== itemList.length - 1 ? 0.5 : 0,
                                 borderBottomColor: colors.secondary,
-                                paddingVertical: 10,
-                                padding: 10,
-                                flexDirection:'row'
+                                paddingVertical: 12,
+                                paddingHorizontal: 10,
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                minHeight: 50
                             }}
                         >
                             {item?.image &&

@@ -101,7 +101,7 @@
           "image": "./assets/images/logo.png",
           "imageWidth": 260,
           "resizeMode": "contain",
-          "backgroundColor": "#222240",
+          "backgroundColor": "#051529",
           "borderRadius": 50
         }
       ],

@@ -75,6 +75,25 @@ export interface PlayMyJamProfile {
   homeVisitFee?: number;
   isAI?: boolean;
   practitionerNumber?: string;
+  medicalHistory?: MedicalHistory;
+  notificationToken?: string;
+}
+export interface Medication {
+  name: string;
+  dosage: string;
+  instructions: string;
+}
+export interface Prescription {
+  id: string;
+  doctorId: string;
+  doctorName: string;
+  doctorSpecialty: string;
+  patientId: string;
+  patientName: string;
+  medications: Medication[];
+  notes?: string;
+  collected: boolean;
+  createdAt: Date;
 }
 export type PrivacyType = {
   type:string;
@@ -195,6 +214,7 @@ export interface Appointment {
   notes: string;
   fee: number;
   paymentMethod: 'cash' | 'card';
+  medicalHistoryAttached: boolean;
   location?: {
     text: string;
     latitude: number;
@@ -212,3 +232,29 @@ export type AppointmentType =
   'clinic' |
   'home' |
   'video';
+
+export interface MedicalHistory {
+  id: string;
+  userId: string;
+  // Basic Information
+  bloodType?: string;
+  height?: string;
+  weight?: string;
+  // Emergency Contact
+  emergencyContact: {
+    name: string;
+    phoneNumber: string;
+  };
+  // Medical Information (simplified text fields)
+  currentConditions?: string;
+  currentMedications?: string;
+  allergies?: string;
+  previousHistory?: string;
+  // Lifestyle
+  lifestyle?: {
+    smoking?: 'never' | 'former' | 'current';
+    alcohol?: 'never' | 'occasional' | 'regular';
+  };
+  lastUpdated: number;
+  isComplete: boolean;
+}

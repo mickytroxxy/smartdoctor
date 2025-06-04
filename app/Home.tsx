@@ -1,9 +1,10 @@
 import { colors } from "@/constants/Colors";
 import { LinearGradient } from "expo-linear-gradient";
-import { View, Text, ActivityIndicator, TextInput, ScrollView } from "react-native";
+import { View, Text, ActivityIndicator, TextInput, ScrollView, Image } from "react-native";
 import { Ionicons, FontAwesome5, MaterialCommunityIcons, FontAwesome } from "@expo/vector-icons";
 import useHome from "@/src/hooks/useHome";
 import useDoctor from "@/src/hooks/useDoctor";
+import useStats from "@/src/hooks/useStats";
 import { DoctorSpecialty, PlayMyJamProfile } from "@/constants/Types";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
@@ -13,6 +14,7 @@ import { currencyFormatter } from "@/src/helpers/methods";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { setActiveUser } from "@/src/state/slices/accountInfo";
 import { useDispatch } from "react-redux";
+import useMessageList from "@/src/hooks/useMessageList";
 
 // Define doctor specialties array since DoctorSpecialty is a type, not a value
 const DOCTOR_SPECIALTIES: DoctorSpecialty[] = [
@@ -47,7 +49,7 @@ const StatsCard = ({
     <Animatable.View
       animation="fadeInRight"
       delay={delay}
-      style={[styles.statsCard, { backgroundColor: color,borderWidth:0.6,borderColor:colors.green }]}
+      style={[styles.statsCard, { backgroundColor: color}]}
     >
       <View style={styles.statsIconContainer}>
         {icon}
@@ -126,14 +128,40 @@ const DoctorCard = ({
               marginRight: 16,
               borderWidth: 2,
               borderColor: '#4568dc',
+              overflow: 'hidden',
             }}>
-              <Text style={{
-                fontSize: 24,
-                fontFamily: 'fontBold',
-                color: '#4568dc',
-              }}>
-                {doctor.fname?.charAt(0) || 'D'}
-              </Text>
+              {doctor.avatar ? (
+                <Image
+                  source={{ uri: doctor.avatar }}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: 30,
+                  }}
+                  resizeMode="cover"
+                />
+              ) : doctor.isAI ? (
+                // Dummy avatar for AI doctors
+                <View style={{
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: '#8a2be2',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderRadius: 30,
+                }}>
+                  <Ionicons name="medkit" size={30} color="#fff" />
+                </View>
+              ) : (
+                // Fallback to initials for doctors without avatar
+                <Text style={{
+                  fontSize: 24,
+                  fontFamily: 'fontBold',
+                  color: '#4568dc',
+                }}>
+                  {doctor.fname?.charAt(0) || 'D'}
+                </Text>
+              )}
             </View>
 
             <View style={{
@@ -273,6 +301,7 @@ const DoctorCard = ({
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { chatPreviews } = useMessageList();
   const dispatch = useDispatch();
   const {
     doctors,
@@ -285,31 +314,34 @@ export default function HomeScreen() {
     accountInfo
   } = useHome();
 
-  // Mock stats data - in a real app, this would come from the API
+  // Get live stats data
+  const {
+    totalAppointments,
+    totalConsultations,
+    totalPrescriptions,
+    loading: statsLoading,
+    error: statsError
+  } = useStats();
+
+  // Live stats data
   const stats = [
     {
       title: "Appointments",
-      value: "12",
+      value: statsLoading ? "..." : totalAppointments.toString(),
       icon: <FontAwesome5 name="calendar-check" size={24} color="#fff" />,
       color: colors.green + 30
     },
     {
       title: "Consultations",
-      value: "8",
+      value: statsLoading ? "..." : totalConsultations.toString(),
       icon: <MaterialCommunityIcons name="video-account" size={24} color="#fff" />,
-      color: "#FF5F6D" + 30
+      color: colors.green + 30
     },
     {
       title: "Prescriptions",
-      value: "5",
+      value: statsLoading ? "..." : totalPrescriptions.toString(),
       icon: <FontAwesome5 name="prescription-bottle-alt" size={24} color="#fff" />,
-      color: "#1D976C" + 30
-    },
-    {
-      title: "Health Score",
-      value: "92%",
-      icon: <FontAwesome5 name="heartbeat" size={24} color="#fff" />,
-      color: "#f46b45" + 30
+      color: colors.green + 30
     }
   ];
 
@@ -325,17 +357,32 @@ export default function HomeScreen() {
           headerShown: true,
           headerTransparent: true,
           headerRight: () => (
-            <TouchableOpacity
-              style={styles.profileButton}
-              onPress={() => {
-                if(accountInfo){
-                  dispatch(setActiveUser(accountInfo))
-                  router.push('/profile');
-                }
-              }}
-            >
-              <Ionicons name="person-circle" size={36} color={colors.white} />
-            </TouchableOpacity>
+            <View style={styles.headerButtonsContainer}>
+              <TouchableOpacity
+                style={styles.headerButton}
+                onPress={() => router.push('/messages')}
+              >
+                <Ionicons name="chatbubbles" size={28} color={colors.white} />
+                {chatPreviews.length > 0 && (
+                  <View style={styles.messageBadge}>
+                    <Text style={styles.messageBadgeText}>
+                      {chatPreviews.length > 9 ? '9+' : chatPreviews.length}
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.profileButton}
+                onPress={() => {
+                  if(accountInfo){
+                    dispatch(setActiveUser(accountInfo))
+                    router.push('/profile');
+                  }
+                }}
+              >
+                <Ionicons name="person-circle" size={36} color={colors.white} />
+              </TouchableOpacity>
+            </View>
           ),
         }}
       />
@@ -484,7 +531,7 @@ export default function HomeScreen() {
               Top Doctors
             </Animatable.Text>
 
-            {loading ? (
+            {(loading && doctors.length === 0) ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={colors.white} />
               </View>

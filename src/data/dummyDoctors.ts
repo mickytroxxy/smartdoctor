@@ -10,7 +10,7 @@ export const AI_DOCTOR: PlayMyJamProfile = {
   experience: 5,
   education: ['Trained on medical data'],
   certifications: ['Virtual Medical Assistant'],
-  avatar: 'https://example.com/ai-doctor.png', // Replace with actual AI doctor image
+  avatar: 'https://media.sciencephoto.com/c0/48/57/85/c0485785-800px-wm.jpg', // Replace with actual AI doctor image
   photos: [],
   availability: {
     days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { colors } from "@/constants/Colors";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch } from "react-native";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import useDoctor from "@/src/hooks/useDoctor";
 import { currencyFormatter, showToast } from "@/src/helpers/methods";
@@ -11,6 +11,8 @@ import { AppointmentType } from "@/constants/Types";
 import { Dropdown } from "@/components/ui/Dropdown";
 import useRating from "@/src/hooks/useRating";
 import RatingModal from "@/components/modals/RatingModal";
+import useMedicalHistory from "@/src/hooks/useMedicalHistory";
+import { useRouter } from "expo-router";
 
 // Appointment Type Selector Component
 const AppointmentTypeSelector = ({
@@ -595,10 +597,90 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontStyle: 'italic',
   },
+  medicalHistorySection: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  medicalHistoryToggle: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  medicalHistoryInfo: {
+    flex: 1,
+    marginRight: 15,
+  },
+  medicalHistoryTitle: {
+    fontSize: 16,
+    fontFamily: 'fontBold',
+    color: colors.green,
+    marginBottom: 4,
+  },
+  medicalHistorySubtitle: {
+    fontSize: 12,
+    fontFamily: 'fontLight',
+    color: colors.green,
+  },
+  completeHistoryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  completeHistoryText: {
+    fontSize: 14,
+    fontFamily: 'fontLight',
+    color: colors.primary,
+    flex: 1,
+    marginLeft: 10,
+  },
+  historyPreview: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  historyPreviewTitle: {
+    fontSize: 14,
+    fontFamily: 'fontBold',
+    color: colors.primary,
+    marginBottom: 8,
+  },
+  historyPreviewText: {
+    fontSize: 12,
+    fontFamily: 'fontLight',
+    color: colors.primary,
+    marginBottom: 4,
+  },
+  editHistoryButton: {
+    alignSelf: 'flex-end',
+    marginTop: 8,
+  },
+  editHistoryText: {
+    fontSize: 12,
+    fontFamily: 'fontLight',
+    color: colors.primary,
+    textDecorationLine: 'underline',
+  },
 });
 
 export const DoctorProfile = () => {
   const { activeUser, accountInfo } = useAuth();
+  const router = useRouter();
+
+  // State declarations
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<'about' | 'book'>(activeUser?.isAI ? 'about' : 'book');
+  const [attachMedicalHistory, setAttachMedicalHistory] = useState(false);
+
+  // Medical history functionality
+  const { medicalHistory, isHistoryComplete } = useMedicalHistory();
 
   const {
     doctor,
@@ -612,7 +694,7 @@ export const DoctorProfile = () => {
     paymentMethods,
     handlePaymentMethodChange,
     bookAppointmentCheckAsyc,
-  } = useDoctor(activeUser?.userId || '');
+  } = useDoctor(activeUser?.userId || '', attachMedicalHistory);
 
   // Rating functionality
   const {
@@ -623,9 +705,6 @@ export const DoctorProfile = () => {
     submitting,
     handleSubmitRating,
   } = useRating(doctor?.userId || '');
-
-  const [showRatingModal, setShowRatingModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'about' | 'book'>(activeUser?.isAI ? 'about' : 'book');
 
   // Define tabs using ES6 object literals
   const tabs = [
@@ -717,6 +796,71 @@ export const DoctorProfile = () => {
               onChange={handlePaymentMethodChange}
               placeholder="Select Payment Method"
             />
+          )
+        },
+        {
+          title: 'Medical History',
+          component: (
+            <View style={styles.medicalHistorySection}>
+              <View style={styles.medicalHistoryToggle}>
+                <View style={styles.medicalHistoryInfo}>
+                  <Text style={styles.medicalHistoryTitle}>
+                    Attach Medical History
+                  </Text>
+                  <Text style={styles.medicalHistorySubtitle}>
+                    {isHistoryComplete
+                      ? 'Share your medical history with the doctor'
+                      : 'Complete your medical history first'
+                    }
+                  </Text>
+                </View>
+                <TouchableOpacity onPress={() => setAttachMedicalHistory(!attachMedicalHistory)}>
+                  <Switch
+                  value={attachMedicalHistory}
+                  onValueChange={setAttachMedicalHistory}
+                  trackColor={{ false: colors.grey, true: colors.primary }}
+                  thumbColor={attachMedicalHistory ? colors.white : colors.white}
+                  disabled={!isHistoryComplete}
+                />
+                </TouchableOpacity>
+              </View>
+
+              {(!isHistoryComplete && attachMedicalHistory) && (
+                <TouchableOpacity
+                  style={styles.completeHistoryButton}
+                  onPress={() => router.push('/medical-history')}
+                >
+                  <Ionicons name="medical" size={20} color={colors.primary} />
+                  <Text style={styles.completeHistoryText}>
+                    Complete Medical History
+                  </Text>
+                  <Ionicons name="chevron-forward" size={16} color={colors.primary} />
+                </TouchableOpacity>
+              )}
+
+              {attachMedicalHistory && isHistoryComplete && (
+                <View style={styles.historyPreview}>
+                  <Text style={styles.historyPreviewTitle}>
+                    Medical History Summary
+                  </Text>
+                  <Text style={styles.historyPreviewText}>
+                    • Medical conditions: {medicalHistory?.currentConditions ? 'Provided' : 'Not provided'}
+                  </Text>
+                  <Text style={styles.historyPreviewText}>
+                    • Current medications: {medicalHistory?.currentMedications ? 'Provided' : 'Not provided'}
+                  </Text>
+                  <Text style={styles.historyPreviewText}>
+                    • Known allergies: {medicalHistory?.allergies ? 'Provided' : 'Not provided'}
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.editHistoryButton}
+                    onPress={() => router.push('/medical-history')}
+                  >
+                    <Text style={styles.editHistoryText}>Edit History</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
           )
         }
       ].map((section, index) => (

@@ -2,12 +2,14 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/constants/Colors';
-import { Appointment, Prescription } from '@/src/types/doctorTypes';
+import { Appointment } from '@/src/types/doctorTypes';
+import { Prescription } from '@/src/helpers/api';
 import StatusBadge from './StatusBadge';
 import { format } from 'date-fns';
 import { currencyFormatter } from '@/src/helpers/methods';
 import useAuth from '@/src/hooks/useAuth';
 import { LinearButton } from '@/components/ui/Button';
+import { useRouter } from 'expo-router';
 
 interface AppointmentDetailsProps {
   visible: boolean;
@@ -31,6 +33,7 @@ const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
   onInitiateCall,
 }) => {
   const { accountInfo } = useAuth();
+  const router = useRouter();
   const isDoctor = accountInfo?.isDoctor;
 
   // Format date for display
@@ -122,6 +125,49 @@ const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
               <Text style={styles.detailLabel}>Notes</Text>
               <Text style={styles.detailValue}>{appointment.notes || 'No notes'}</Text>
             </View>
+
+            {/* Medical History Section - Only show for doctors when attached */}
+            {isDoctor && appointment.medicalHistoryAttached && (
+              <View style={styles.detailSection}>
+                <Text style={styles.detailLabel}>Medical History</Text>
+                <View style={styles.medicalHistoryContainer}>
+                  <View style={styles.medicalHistoryInfo}>
+                    <Ionicons name="medical" size={20} color={colors.primary} />
+                    <Text style={styles.medicalHistoryText}>
+                      Patient has shared their medical history
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.viewHistoryButton}
+                    onPress={() => router.push({
+                      pathname: '/patient-medical-history',
+                      params: {
+                        patientId: appointment.patientId,
+                        patientName: appointment.patientName
+                      }
+                    })}
+                  >
+                    <Text style={styles.viewHistoryButtonText}>View History</Text>
+                    <Ionicons name="chevron-forward" size={16} color={colors.primary} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
+            {/* Show when medical history is not attached */}
+            {isDoctor && !appointment.medicalHistoryAttached && (
+              <View style={styles.detailSection}>
+                <Text style={styles.detailLabel}>Medical History</Text>
+                <View style={styles.medicalHistoryContainer}>
+                  <View style={styles.medicalHistoryInfo}>
+                    <Ionicons name="medical-outline" size={20} color={colors.grey} />
+                    <Text style={styles.medicalHistoryTextDisabled}>
+                      No medical history attached
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            )}
 
             {/* Action buttons */}
             <View style={styles.actionButtonsContainer}>
@@ -420,6 +466,42 @@ const styles = StyleSheet.create({
     fontFamily: 'fontLight',
     color: colors.tertiary,
     marginLeft: 8,
+  },
+  medicalHistoryContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  medicalHistoryInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  medicalHistoryText: {
+    fontSize: 14,
+    fontFamily: 'fontLight',
+    color: colors.tertiary,
+    marginLeft: 8,
+  },
+  medicalHistoryTextDisabled: {
+    fontSize: 14,
+    fontFamily: 'fontLight',
+    color: colors.grey,
+    marginLeft: 8,
+  },
+  viewHistoryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  viewHistoryButtonText: {
+    fontSize: 12,
+    fontFamily: 'fontBold',
+    color: colors.white,
+    marginRight: 4,
   },
 });
 
