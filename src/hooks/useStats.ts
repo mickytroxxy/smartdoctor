@@ -58,9 +58,9 @@ const useStats = () => {
       const pendingAppointments = appointments.filter(apt => apt.status === 'pending').length;
       const cancelledAppointments = appointments.filter(apt => apt.status === 'cancelled').length;
 
-      // Count consultations (completed video/clinic appointments)
+      // Count consultations (completed video/surgery appointments)
       const totalConsultations = appointments.filter(apt =>
-        apt.status === 'completed' && (apt.type === 'video' || apt.type === 'clinic')
+        apt.status === 'completed' && (apt.type === 'video' || apt.type === 'surgery')
       ).length;
 
       // Fetch prescriptions

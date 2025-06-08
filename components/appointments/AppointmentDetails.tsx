@@ -97,8 +97,8 @@ const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
             <View style={styles.detailSection}>
               <Text style={styles.detailLabel}>Type</Text>
               <Text style={styles.detailValue}>
-                {appointment.type === 'clinic'
-                  ? 'Clinic Visit'
+                {appointment.type === 'surgery'
+                  ? 'Surgery Visit'
                   : appointment.type === 'video'
                     ? 'Video Call'
                     : 'Home Visit'

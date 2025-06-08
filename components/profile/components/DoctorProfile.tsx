@@ -26,7 +26,7 @@ const AppointmentTypeSelector = ({
 }) => {
   // Use ES6 spread to conditionally add home visit option
   const baseTypes = [
-    { type: 'clinic' as AppointmentType, label: 'Clinic Visit', icon: 'medical' },
+    { type: 'surgery' as AppointmentType, label: 'Surgery Visit', icon: 'medical' },
     { type: 'video' as AppointmentType, label: 'Video Call', icon: 'videocam' },
   ];
 
@@ -891,14 +891,21 @@ export const DoctorProfile = () => {
           {[1, 2, 3, 4, 5].map((star) => (
             <FontAwesome
               key={star}
-              name={doctor.rating && star <= doctor.rating.average ? "star" : "star-o"}
+              name={
+                doctor?.ratings && doctor.ratings.length > 0
+                  ? (doctor.ratings.reduce((acc, curr) => acc + curr.rating, 0) / doctor.ratings.length) >= star
+                    ? "star" : "star-o"
+                  : "star-o"
+              }
               size={20}
               color="#FFD700"
               style={{ marginRight: 2 }}
             />
           ))}
           <Text style={styles.ratingText}>
-            {doctor.rating ? `${doctor.rating.average.toFixed(1)} (${doctor.rating.count} reviews)` : '0.0 (0 reviews)'}
+            {doctor?.ratings && doctor.ratings.length > 0
+                    ? (doctor.ratings.reduce((acc, curr) => acc + curr.rating, 0) / doctor.ratings.length).toFixed(1)
+                    : "0.0"} ({doctor?.ratings?.length || 0})
           </Text>
         </View>
       </View>

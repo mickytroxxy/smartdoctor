@@ -31,7 +31,7 @@ const useDoctor = (doctorId: string, medicalHistoryAttached: boolean = false) =>
   const [appointmentDate, setAppointmentDate] = useState('');
   const [appointmentTime, setAppointmentTime] = useState('');
   const {handleTransaction} = useUpdates()
-  const [appointmentType, setAppointmentType] = useState<AppointmentType>('clinic');
+  const [appointmentType, setAppointmentType] = useState<AppointmentType>('surgery');
   const [symptoms, setSymptoms] = useState('');
   const [notes, setNotes] = useState('');
   const {secrets} = useSecrets();
@@ -72,7 +72,7 @@ const useDoctor = (doctorId: string, medicalHistoryAttached: boolean = false) =>
     }
   }, [accountInfo]);
   const [paymentMethods, setPaymentMethods] = useState<ItemListType[]>([
-    { id: 'cash', label: 'Cash Payment', selected: true, subtitle: 'Pay at the clinic' },
+    { id: 'cash', label: 'Cash Payment', selected: true, subtitle: 'Pay at the surgery' },
     { id: 'card', label: 'Card Payment', selected: false, subtitle: 'Pay with account balance' }
   ]);
 

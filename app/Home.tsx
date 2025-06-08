@@ -96,9 +96,11 @@ const DoctorCard = ({
         onPress={onPress}
         activeOpacity={0.9}
         style={{
-          backgroundColor: colors.white,
+          backgroundColor: colors.tertiary + 30,
           borderRadius: 10,
           overflow: 'hidden',
+          borderWidth: 1,
+          borderColor: colors.transparent,
         }}
       >
         <LinearGradient
@@ -155,9 +157,9 @@ const DoctorCard = ({
               ) : (
                 // Fallback to initials for doctors without avatar
                 <Text style={{
-                  fontSize: 24,
+                  fontSize: 14,
                   fontFamily: 'fontBold',
-                  color: '#4568dc',
+                  color: colors.white,
                 }}>
                   {doctor.fname?.charAt(0) || 'D'}
                 </Text>
@@ -168,9 +170,9 @@ const DoctorCard = ({
               flex: 1,
             }}>
               <Text style={{
-                fontSize: 18,
+                fontSize: 14,
                 fontFamily: 'fontBold',
-                color: '#333',
+                color: colors.white,
                 marginBottom: 4,
               }}>
                 {doctor.fname}
@@ -179,7 +181,7 @@ const DoctorCard = ({
               <Text style={{
                 fontSize: 14,
                 fontFamily: 'fontLight',
-                color: colors.grey,
+                color: colors.white,
                 marginBottom: 4,
               }}>
                 {doctor.specialty}
@@ -192,7 +194,12 @@ const DoctorCard = ({
                 {[1, 2, 3, 4, 5].map((star) => (
                   <FontAwesome
                     key={star}
-                    name={doctor.rating && star <= doctor.rating.average ? "star" : "star-o"}
+                    name={
+                      doctor?.ratings && doctor.ratings.length > 0
+                        ? (doctor.ratings.reduce((acc, curr) => acc + curr.rating, 0) / doctor.ratings.length) >= star
+                          ? "star" : "star-o"
+                        : "star-o"
+                    }
                     size={14}
                     color="#FFD700"
                     style={{ marginRight: 2 }}
@@ -204,7 +211,9 @@ const DoctorCard = ({
                   color: colors.grey,
                   marginLeft: 4,
                 }}>
-                  {doctor.rating ? `${doctor.rating.average.toFixed(1)} (${doctor.rating.count})` : '0.0 (0)'}
+                  {doctor?.ratings && doctor.ratings.length > 0
+                    ? (doctor.ratings.reduce((acc, curr) => acc + curr.rating, 0) / doctor.ratings.length).toFixed(1)
+                    : "0.0"} ({doctor?.ratings?.length || 0})
                 </Text>
               </View>
             </View>
@@ -226,7 +235,7 @@ const DoctorCard = ({
               <Text style={{
                 fontSize: 18,
                 fontFamily: 'fontBold',
-                color: '#4568dc',
+                color: colors.white,
                 marginRight: 8,
               }}>
                 {currencyFormatter(doctor.fees || 0)}

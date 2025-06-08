@@ -22,6 +22,8 @@ import { LinearButton } from '@/components/ui/Button';
 import * as Sharing from 'expo-sharing';
 import * as Print from 'expo-print';
 import { useSecrets } from '@/src/hooks/useSecrets';
+import * as FileSystem from 'expo-file-system';
+import { Asset } from 'expo-asset';
 
 interface PrescriptionCardProps {
   prescription: Prescription;
@@ -72,12 +74,24 @@ const PrescriptionCard: React.FC<PrescriptionCardProps> = ({ prescription, onEdi
       // Generate QR code URL using a free QR code API
       const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(secrets?.website + '/verify-prescription/' + prescription.id)}`;
 
+      // Convert logo to base64 for embedding
+      const logoAsset = Asset.fromModule(require('@/assets/images/logo.png'));
+      await logoAsset.downloadAsync();
+      const logoBase64 = await FileSystem.readAsStringAsync(logoAsset.localUri!, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      const logoDataUri = `data:image/png;base64,${logoBase64}`;
+
       // Generate HTML content for the prescription
       const htmlContent = `
         <html>
           <head>
             <style>
-              body { font-family: 'Helvetica'; margin: 40px; }
+              body {
+                font-family: 'Helvetica';
+                margin: 40px;
+                position: relative;
+              }
               h1 { color: ${colors.primary}; margin: 0; }
               .header {
                 display: flex;
@@ -111,28 +125,62 @@ const PrescriptionCard: React.FC<PrescriptionCardProps> = ({ prescription, onEdi
               table { width: 100%; border-collapse: collapse; }
               th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
               th { background-color: ${colors.faintGray}; }
+
+              /* Watermark styles */
+              .watermark {
+                position: fixed;
+                top: 75%;
+                left: 75%;
+                transform: translate(-50%, -50%) rotate(-45deg);
+                opacity: 0.1;
+                z-index: -1;
+                pointer-events: none;
+              }
+              .watermark img {
+                width: 220px;
+                height: 220px;
+                border-radius: 50px;
+                object-fit: contain;
+              }
+
+              /* Additional watermark for multiple pages */
+              @media print {
+                .watermark {
+                  position: fixed;
+                  top: 75%;
+                  left: 75%;
+                  transform: translate(-50%, -50%) rotate(-45deg);
+                  opacity: 0.08;
+                  z-index: -1;
+                }
+              }
             </style>
           </head>
           <body>
+            <!-- Watermark -->
+            <div class="watermark">
+              <img src="${logoDataUri}" alt="SmartDoctor Logo" />
+            </div>
+
             <div class="header">
               <div class="header-left">
                 <h1>Medical Prescription</h1>
                 <p>Date: ${formatDate(prescription.createdAt)}</p>
                 <p><strong>Prescription ID:</strong> ${prescription.id}</p>
+                
+                <div class="section">
+                  <h3>Doctor Information</h3>
+                  <p><strong>Name:</strong> Dr. ${doctorDetails?.fname || prescription.doctorName || 'Unknown'}</p>
+                  <p><strong>Specialty:</strong> ${doctorDetails?.specialty || prescription.doctorSpecialty || 'General Practitioner'}</p>
+                  ${doctorDetails?.practitionerNumber ? `<p><strong>Practice Number:</strong> ${doctorDetails.practitionerNumber}</p>` : ''}
+                  ${doctorDetails?.address?.text ? `<p><strong>Address:</strong> ${doctorDetails.address.text}</p>` : ''}
+                  ${doctorDetails?.phoneNumber ? `<p><strong>Phone:</strong> ${doctorDetails.phoneNumber}</p>` : ''}
+                </div>
               </div>
               <div class="header-right">
                 <img src="${qrCodeUrl}" alt="QR Code" class="qr-code" />
                 <p class="qr-label">Scan for verification</p>
               </div>
-            </div>
-
-            <div class="section">
-              <h3>Doctor Information</h3>
-              <p><strong>Name:</strong> Dr. ${doctorDetails?.fname || prescription.doctorName || 'Unknown'}</p>
-              <p><strong>Specialty:</strong> ${doctorDetails?.specialty || prescription.doctorSpecialty || 'General Practitioner'}</p>
-              ${doctorDetails?.practitionerNumber ? `<p><strong>Practice Number:</strong> ${doctorDetails.practitionerNumber}</p>` : ''}
-              ${doctorDetails?.address?.text ? `<p><strong>Address:</strong> ${doctorDetails.address.text}</p>` : ''}
-              ${doctorDetails?.phoneNumber ? `<p><strong>Phone:</strong> ${doctorDetails.phoneNumber}</p>` : ''}
             </div>
 
             <div class="section">
@@ -178,7 +226,6 @@ const PrescriptionCard: React.FC<PrescriptionCardProps> = ({ prescription, onEdi
 
             <div class="footer">
               <p>This is an electronic prescription generated by SmartDoctor App.</p>
-              <p><strong>Prescription ID:</strong> ${prescription.id}</p>
               <p><em>Scan the QR code above to verify this prescription</em></p>
             </div>
           </body>
@@ -243,7 +290,7 @@ const PrescriptionCard: React.FC<PrescriptionCardProps> = ({ prescription, onEdi
       </View>
 
       <View style={styles.cardActions}>
-        {isDoctor && (
+        {/* {isDoctor && (
           <View style={styles.buttonWrapper}>
             <LinearButton
               btnInfo={{
@@ -262,7 +309,7 @@ const PrescriptionCard: React.FC<PrescriptionCardProps> = ({ prescription, onEdi
               handleBtnClick={() => onEdit && onEdit(prescription)}
             />
           </View>
-        )}
+        )} */}
 
         <View style={styles.buttonWrapper}>
           <LinearButton
@@ -270,12 +317,12 @@ const PrescriptionCard: React.FC<PrescriptionCardProps> = ({ prescription, onEdi
               styles: { marginTop: 0, backgroundColor: colors.tertiary }
             }}
             textInfo={{
-              text: 'Download',
+              text: 'Share',
               color: colors.primary
             }}
             iconInfo={{
               type: 'Ionicons',
-              name: 'download-outline',
+              name: 'share-outline',
               size: 16,
               color: colors.primary
             }}

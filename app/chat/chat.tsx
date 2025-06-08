@@ -4,11 +4,11 @@ import React, { useCallback } from 'react'
 import { Bubble, Day, GiftedChat, InputToolbar, Send } from 'react-native-gifted-chat'
 import useChat from "@/src/hooks/useChat";
 import useAuth from "@/src/hooks/useAuth";
-import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Animatable from 'react-native-animatable';
 import { colors } from "@/constants/Colors";
 import { Stack, useRouter } from "expo-router";
+import { GestureHandlerRootView, TouchableOpacity } from "react-native-gesture-handler";
 
 export default function ChatScreen() {
   const {accountInfo, activeUser} = useAuth();
@@ -159,7 +159,7 @@ export default function ChatScreen() {
   ), [sendPhoto]);
 
   return(
-    <View style={{flex:1,backgroundColor:colors.tertiary}}>
+    <GestureHandlerRootView style={{flex:1,backgroundColor:colors.tertiary}}>
       <Stack.Screen
         options={{
           headerShown: true,
@@ -230,7 +230,7 @@ export default function ChatScreen() {
         }}
         renderActions={renderActions}
     />
-    </View>
+    </GestureHandlerRootView>
   )  
 }
 const styles = StyleSheet.create({

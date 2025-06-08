@@ -69,7 +69,7 @@ export type AppointmentStatus =
   'cancelled';
 
 export type AppointmentType =
-  'clinic' |
+  'surgery' |
   'home' |
   'video';
 

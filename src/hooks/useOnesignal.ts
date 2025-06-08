@@ -65,10 +65,8 @@ export const useOnesignal = () => {
     const { accountInfo } = useAuth();
     const oneSignalInit = async () => {
         const token = await OneSignal.User.pushSubscription.getIdAsync();
-        console.log(token)
-        sendNotification([token || ''],'Just a test','Wow there notilol',{})
         if (token) {
-            updateData("users", accountInfo?.userId as any, { value: token, field: 'notificationToken' });
+            await updateData("users", accountInfo?.userId as any, { value: token, field: 'notificationToken' });
         }
     }
     

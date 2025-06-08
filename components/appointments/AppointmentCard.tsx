@@ -49,7 +49,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({ appointment, onPress 
         <View style={styles.typeContainer}>
           <Ionicons
             name={
-              appointment.type === 'clinic'
+              appointment.type === 'surgery'
                 ? 'medical'
                 : appointment.type === 'video'
                   ? 'videocam'
@@ -59,8 +59,8 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({ appointment, onPress 
             color={colors.primary}
           />
           <Text style={styles.typeText}>
-            {appointment.type === 'clinic'
-              ? 'Clinic Visit'
+            {appointment.type === 'surgery'
+              ? 'Surgery Visit'
               : appointment.type === 'video'
                 ? 'Video Call'
                 : 'Home Visit'
