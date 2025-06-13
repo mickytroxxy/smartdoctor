@@ -13,6 +13,7 @@ import RegisterDocScreen from "./components/Register";
 import { DoctorProfile } from "./components/DoctorProfile";
 import useMedicalHistory from "@/src/hooks/useMedicalHistory";
 import { useRouter } from "expo-router";
+import MedicalAid from "./components/MedicalAid";
 
 export default function BodySection() {
     const {handleChange} = usePhotos();
@@ -33,7 +34,7 @@ export default function BodySection() {
             <Stats/>
 
             {/* Medical History Button - Only for profile owner and non-AI users */}
-            {(profileOwner && !activeUser?.isAI) && (
+            {(profileOwner && !activeUser?.isAI && !activeUser?.isDoctor) && (
                 <View style={{marginTop:12,gap:12}}>
                     <ProfileBtn
                         headerText="Medical History"
@@ -53,6 +54,18 @@ export default function BodySection() {
             {showEditAddress &&
                 <AddressButton handleBtnClick={(address:LocationType) => handleChange('address',address)} />
             }
+            {/* Doctor User Management Section - Only for doctors */}
+            {(profileOwner && accountInfo?.isDoctor) && (
+                <View style={{marginTop:12,gap:12}}>
+                    <Text style={{fontFamily:'fontBold',color:colors.tertiary,fontSize:12}}>Staff Management</Text>
+                    <ProfileBtn
+                        headerText="Manage Users"
+                        subText="Create, view, and manage staff accounts (receptionists, assistants)"
+                        onPress={() => router.push('/doctor-users' as any)}
+                    />
+                </View>
+            )}
+
             {(profileOwner && !accountInfo?.isDoctor) &&
                 <View style={{marginTop:12,gap:12}}>
                     <Text style={{fontFamily:'fontBold',color:colors.tertiary,fontSize:12}}>For Healthcare Professionals</Text>
@@ -61,6 +74,10 @@ export default function BodySection() {
             }
             <RegisterDocScreen showDoctorDialog={showDoctorDialog} setShowDoctorDialog={(v) => setShowDoctorDialog(v)} />
             {(activeUser?.isDoctor && !profileOwner) && <DoctorProfile />}
+            {/* Medical Aid Section - Only for profile owner and non-AI users */}
+            {(profileOwner && !activeUser?.isAI && !activeUser?.isDoctor) && (
+                <MedicalAid onUpdate={() => {}} />
+            )}
         </View>
     );
 }

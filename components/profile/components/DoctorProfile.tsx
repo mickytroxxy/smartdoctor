@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { colors } from "@/constants/Colors";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch } from "react-native";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
@@ -668,6 +668,32 @@ const styles = StyleSheet.create({
     color: colors.primary,
     textDecorationLine: 'underline',
   },
+  userManagementButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.faintGray,
+    padding: 20,
+  },
+  userManagementContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  userManagementText: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  userManagementTitle: {
+    fontSize: 16,
+    fontFamily: 'fontBold',
+    color: colors.tertiary,
+    marginBottom: 4,
+  },
+  userManagementSubtitle: {
+    fontSize: 14,
+    fontFamily: 'fontLight',
+    color: colors.grey,
+  },
 });
 
 export const DoctorProfile = () => {
@@ -676,7 +702,9 @@ export const DoctorProfile = () => {
 
   // State declarations
   const [showRatingModal, setShowRatingModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'about' | 'book'>(activeUser?.isAI ? 'about' : 'book');
+  const [activeTab, setActiveTab] = useState<'about' | 'book' | 'users'>(
+    activeUser?.isAI ? 'about' : 'book'
+  );
   const [attachMedicalHistory, setAttachMedicalHistory] = useState(false);
 
   // Medical history functionality
@@ -707,10 +735,15 @@ export const DoctorProfile = () => {
   } = useRating(doctor?.userId || '');
 
   // Define tabs using ES6 object literals
-  const tabs = [
-    { id: 'book', label: 'Book Appointment', icon: 'calendar' },
-    { id: 'about', label: 'About', icon: 'information-circle' }
-  ];
+  const tabs = accountInfo?.isDoctor && accountInfo?.userId === doctor?.userId
+    ? [
+        { id: 'about', label: 'About', icon: 'information-circle' },
+        { id: 'users', label: 'Manage Staff', icon: 'people' }
+      ]
+    : [
+        { id: 'book', label: 'Book Appointment', icon: 'calendar' },
+        { id: 'about', label: 'About', icon: 'information-circle' }
+      ];
 
   // Use arrow function for event handler
   const handleRateDoctor = () => {
@@ -977,7 +1010,7 @@ export const DoctorProfile = () => {
                         styles.tab,
                         activeTab === tab.id && styles.activeTab
                     ]}
-                    onPress={() => setActiveTab(tab.id as 'about' | 'book')}
+                    onPress={() => setActiveTab(tab.id as 'about' | 'book' | 'users')}
                     activeOpacity={0.7}
                     >
                     <Ionicons
@@ -1000,7 +1033,24 @@ export const DoctorProfile = () => {
             </View>
         }
 
-        {activeTab === 'about' ? aboutContent : bookingContent}
+        {activeTab === 'about' ? aboutContent :
+         activeTab === 'users' ? (
+           <TouchableOpacity
+             style={styles.userManagementButton}
+             onPress={() => router.push('/doctor-users' as any)}
+           >
+             <View style={styles.userManagementContent}>
+               <Ionicons name="people" size={24} color={colors.primary} />
+               <View style={styles.userManagementText}>
+                 <Text style={styles.userManagementTitle}>Manage Staff</Text>
+                 <Text style={styles.userManagementSubtitle}>
+                   Create, view, and manage staff accounts
+                 </Text>
+               </View>
+               <Ionicons name="chevron-forward" size={20} color={colors.primary} />
+             </View>
+           </TouchableOpacity>
+         ) : bookingContent}
         {ratingSection}
       </ScrollView>
 

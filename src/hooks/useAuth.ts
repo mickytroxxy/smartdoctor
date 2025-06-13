@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../state/store';
 import { phoneNoValidation, sendSms, showToast } from '../helpers/methods';
-import { createData, getGeoPoint, getUserDetailsByPhone, loginApi, updateData, updateTable } from '../helpers/api';
+import { createData, getGeoPoint, getUserDetailsByPhone, loginApi, loginWithDoctorUser, updateData, updateTable } from '../helpers/api';
 import { setAccountInfo } from '../state/slices/accountInfo';
 import { setConfirmDialog } from '../state/slices/ConfirmDialog';
 import { useRouter } from 'expo-router';
@@ -40,7 +40,33 @@ const useAuth = () => {
     const handleChange = (field:string,value:string) => setFormData(v =>({...v, [field] : value}));
     const {updateLoadingState} = useLoader();
 
-    const login = useCallback(async() =>{
+    const login = useCallback(async(doctorId?: string, userCode?: string) =>{
+        // Doctor ID login mode
+        if (doctorId && userCode) {
+            if (doctorId.length < 3) {
+                showToast("Please enter a valid Doctor ID");
+                return;
+            }
+            if (userCode.length < 4) {
+                showToast("Please enter a valid User ID");
+                return;
+            }
+
+            updateLoadingState(true, 'Authenticating with Doctor ID...');
+            const response = await loginWithDoctorUser(doctorId, userCode);
+
+            if (response.length > 0) {
+                dispatch(setAccountInfo(response[0]));
+                router.push("/Home");
+                showToast(`Welcome ${response[0].fname}!`);
+            } else {
+                showToast("Invalid Doctor ID or User ID. Please check your credentials.");
+            }
+            updateLoadingState(false, '');
+            return;
+        }
+
+        // Normal phone/password login mode
         if(formData.phoneNumber.length > 7){
             if(formData.password.length > 5){
                 const phoneNumber = phoneNoValidation(formData.phoneNumber,countryData?.dialCode);
@@ -62,7 +88,7 @@ const useAuth = () => {
         }else{
             showToast("Your phone number is not valid!");
         }
-    },[formData])
+    },[formData, countryData])
     const logOut = () => {
         dispatch(setConfirmDialog({isVisible:true,text:`Hi ${accountInfo?.fname}, You are about t sign out, your phonenumber and password will be required to sign in again!`,okayBtn:'Cancel',severity:true,cancelBtn:'LOG_OUT',response:(res:boolean) => {
             if(!res){

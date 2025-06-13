@@ -165,6 +165,40 @@ export const nativeLink = (type: string, obj: { lat?: number; lng?: number; labe
       Linking.openURL(url);
     }
 };
+
+// Send WhatsApp message with login details
+export const sendWhatsAppLoginDetails = (phoneNumber: string, doctorId: string, userCode: string, staffName: string, doctorName: string): void => {
+  const message = `🏥 SmartDoctor Staff Login Details
+
+Hello ${staffName},
+
+Dr. ${doctorName} has created your SmartDoctor staff account. Here are your login details:
+
+👨‍⚕️ Doctor ID: ${doctorId}
+🆔 Your User ID: ${userCode}
+
+📱 How to login:
+1. Open SmartDoctor app
+2. Select "Login with Doctor ID"
+3. Enter Doctor ID: ${doctorId}
+4. Enter Your User ID: ${userCode}
+
+🔐 Your staff account is now ready to use!
+
+You can now:
+✅ Manage appointments
+✅ Access patient information
+✅ Communicate with the doctor
+✅ Handle administrative tasks
+
+Need help? Contact Dr. ${doctorName}
+
+Best regards,
+SmartDoctor Team`;
+
+  const url = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
+  Linking.openURL(url);
+};
 export const sendPushNotification = async (to: string | null | undefined, title: string, body: string, data: {route:string,user:any}): Promise<void> => {
   if (to) {
     const message = {to,sound: 'default',title,body,data,priority: 'high'};

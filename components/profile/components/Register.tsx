@@ -12,6 +12,7 @@ import { Dropdown, ItemListType } from "@/components/ui/Dropdown";
 import { AddressButton, Button } from "@/components/ui/Button";
 import { CustomSwitch } from "@/components/ui/Switch";
 import { DoctorSpecialty, LocationType } from "@/constants/Types";
+import { useSecrets } from "@/src/hooks/useSecrets";
 
 export default function RegisterDocScreen({showDoctorDialog, setShowDoctorDialog}: {showDoctorDialog: boolean, setShowDoctorDialog: (v: boolean) => void}) {
   const {accountInfo, setAccountInfo } = useAuth();
@@ -25,10 +26,8 @@ export default function RegisterDocScreen({showDoctorDialog, setShowDoctorDialog
   const [homeVisitFee, setHomeVisitFee] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const specialtyItems: ItemListType[] = [
-    'General Practitioner', 'Cardiologist', 'Dermatologist', 'Pediatrician', 'Neurologist', 'Psychiatrist', 'Orthopedic', 'Gynecologist', 'Ophthalmologist', 'Dentist'
-  ].map(id => ({ id, label: id, selected: specialty === id }));
+  const {secrets} = useSecrets();
+  const specialtyItems: ItemListType[] = secrets?.DOCTOR_SPECIALTIES?.map(id => ({ id, label: id, selected: specialty === id }));
 
   const handleDoctorDialogClose = () => {
     setShowDoctorDialog(false);
@@ -63,6 +62,7 @@ export default function RegisterDocScreen({showDoctorDialog, setShowDoctorDialog
         practitionerNumber,
         experience: parseInt(experience),
         about,
+        isVerified:false,
         fees: parseInt(fees),
         education: ["Medical School"],
         certifications: ["Medical License"],

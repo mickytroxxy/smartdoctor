@@ -79,6 +79,91 @@ export const loginApi = async (phoneNumber: string, password: string): Promise<a
     return [];
   }
 };
+
+// Login with Doctor ID + User ID
+export const loginWithDoctorUser = async (doctorId: string, userCode: string): Promise<any[]> => {
+  try {
+    const querySnapshot = await getDocs(
+      query(
+        collection(db, "users"),
+        where("managedByDoctor", "==", doctorId),
+        where("doctorUserCode", "==", userCode),
+        where("deleted", "==", false),
+        where("isActive", "==", true)
+      )
+    );
+    const data = querySnapshot.docs.map((doc) => doc.data());
+    return data;
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
+};
+
+// Get users managed by a doctor
+export const getDoctorManagedUsers = async (doctorId: string): Promise<PlayMyJamProfile[]> => {
+  try {
+    const querySnapshot = await getDocs(
+      query(
+        collection(db, "users"),
+        where("managedByDoctor", "==", doctorId),
+        where("deleted", "==", false),
+        orderBy("date", "desc")
+      )
+    );
+    return querySnapshot.docs.map((doc) => doc.data() as PlayMyJamProfile);
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
+};
+
+// Create a user managed by doctor
+export const createDoctorManagedUser = async (doctorId: string, userData: Partial<PlayMyJamProfile>): Promise<PlayMyJamProfile | null> => {
+  try {
+    const userId = `${doctorId.slice(0, 3).toUpperCase()}${Math.floor(Math.random() * 89999 + 10000)}`;
+    const userCode = `${Math.floor(Math.random() * 8999 + 1000)}`;
+
+    const newUser: PlayMyJamProfile = {
+      ...userData,
+      userId,
+      doctorUserCode: userCode,
+      managedByDoctor: doctorId,
+      doctorCreatedUser: true,
+      isActive: true,
+      deleted: false,
+      date: Date.now(),
+    };
+
+    await setDoc(doc(db, 'users', userId), newUser);
+    return newUser;
+  } catch (error) {
+    console.error('Error creating doctor-managed user:', error);
+    return null;
+  }
+};
+
+// Toggle user active status
+export const toggleUserActiveStatus = async (userId: string, isActive: boolean): Promise<boolean> => {
+  try {
+    await updateDoc(doc(db, 'users', userId), { isActive });
+    return true;
+  } catch (error) {
+    console.error('Error toggling user status:', error);
+    return false;
+  }
+};
+
+// Delete doctor-managed user
+export const deleteDoctorManagedUser = async (userId: string): Promise<boolean> => {
+  try {
+    await updateDoc(doc(db, 'users', userId), { deleted: true });
+    return true;
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    return false;
+  }
+};
 export const getMessages = async (userId:string,activeUserId:string,cb:(...args:any) => void) => {
 
   try {
@@ -180,7 +265,7 @@ export const getNearbyDoctors = async (
   radiusInKm: number = 10,
 ): Promise<PlayMyJamProfile[]> => {
   try {
-    const querySnapshot = await getDocs(query(collection(db, "users"), where("isDoctor", "==", true)));
+    const querySnapshot = await getDocs(query(collection(db, "users"), where("isDoctor", "==", true), where("isVerified", "==", true)));
     const data = querySnapshot.docs.map((doc) => doc.data());
     return [AI_DOCTOR, ...data];
   } catch (error) {
@@ -260,6 +345,73 @@ export const getUserAppointments = async (userId: string, isDoctor = false): Pro
     return querySnapshot.docs.map(doc => doc.data() as Appointment);
   } catch (error) {
     console.error('Error getting appointments:', error);
+    return [];
+  }
+};
+
+// Get appointment with patient's medical aid details (for doctors)
+export const getAppointmentWithMedicalAid = async (appointmentId: string): Promise<Appointment | null> => {
+  try {
+    const appointmentDoc = await getDoc(doc(db, 'appointments', appointmentId));
+    if (!appointmentDoc.exists()) {
+      return null;
+    }
+
+    const appointment = appointmentDoc.data() as Appointment;
+
+    // If payment method is medical aid, fetch patient's medical aid details
+    if (appointment.paymentMethod === 'medical_aid') {
+      const patientDetails = await getUserById(appointment.patientId);
+      if (patientDetails?.medicalAid) {
+        appointment.medicalAidDetails = {
+          provider: patientDetails.medicalAid.provider,
+          memberNumber: patientDetails.medicalAid.memberNumber,
+          documentUrl: patientDetails.medicalAid.documentUrl,
+          isVerified: patientDetails.medicalAid.isVerified || false,
+        };
+      }
+    }
+
+    return appointment;
+  } catch (error) {
+    console.error('Error getting appointment with medical aid:', error);
+    return null;
+  }
+};
+
+// Get all appointments with medical aid details for a doctor
+export const getDoctorAppointmentsWithMedicalAid = async (doctorId: string): Promise<Appointment[]> => {
+  try {
+    const q = query(
+      collection(db, 'appointments'),
+      where('doctorId', '==', doctorId),
+      orderBy('createdAt', 'desc')
+    );
+
+    const querySnapshot = await getDocs(q);
+    const appointments = querySnapshot.docs.map(doc => doc.data() as Appointment);
+
+    // Enhance appointments with medical aid details where applicable
+    const enhancedAppointments = await Promise.all(
+      appointments.map(async (appointment) => {
+        if (appointment.paymentMethod === 'medical_aid') {
+          const patientDetails = await getUserById(appointment.patientId);
+          if (patientDetails?.medicalAid) {
+            appointment.medicalAidDetails = {
+              provider: patientDetails.medicalAid.provider,
+              memberNumber: patientDetails.medicalAid.memberNumber,
+              documentUrl: patientDetails.medicalAid.documentUrl,
+              isVerified: patientDetails.medicalAid.isVerified || false,
+            };
+          }
+        }
+        return appointment;
+      })
+    );
+
+    return enhancedAppointments;
+  } catch (error) {
+    console.error('Error getting doctor appointments with medical aid:', error);
     return [];
   }
 };

@@ -71,10 +71,27 @@ const useDoctor = (doctorId: string, medicalHistoryAttached: boolean = false) =>
       console.error('Error sending notification to patient:', error);
     }
   }, [accountInfo]);
-  const [paymentMethods, setPaymentMethods] = useState<ItemListType[]>([
-    { id: 'cash', label: 'Cash Payment', selected: true, subtitle: 'Pay at the surgery' },
-    { id: 'card', label: 'Card Payment', selected: false, subtitle: 'Pay with account balance' }
-  ]);
+  const [paymentMethods, setPaymentMethods] = useState<ItemListType[]>([]);
+
+  // Initialize payment methods based on user's medical aid status
+  useEffect(() => {
+    const basePaymentMethods = [
+      { id: 'cash', label: 'Cash Payment', selected: true, subtitle: 'Pay at the surgery' },
+      { id: 'card', label: 'Card Payment', selected: false, subtitle: 'Pay with account balance' }
+    ];
+
+    // Add medical aid option if user has uploaded medical aid document
+    if (accountInfo?.medicalAid?.documentUrl) {
+      basePaymentMethods.push({
+        id: 'medical_aid',
+        label: 'Medical Aid',
+        selected: false,
+        subtitle: `${accountInfo.medicalAid.provider} - ${accountInfo.medicalAid.memberNumber}`
+      });
+    }
+
+    setPaymentMethods(basePaymentMethods);
+  }, [accountInfo?.medicalAid]);
 
   // Helper function to handle payment method change
   const handlePaymentMethodChange = (selectedItem: ItemListType) => {
@@ -131,6 +148,15 @@ const useDoctor = (doctorId: string, medicalHistoryAttached: boolean = false) =>
           fee: appointmentType === 'home' && selectedDoctor?.supportsHomeVisit
             ? (selectedDoctor.fees || 0) + (selectedDoctor.homeVisitFee || 0)
             : (selectedDoctor?.fees || 0),
+          // Include medical aid details if payment method is medical aid
+          ...(paymentMethod === 'medical_aid' && accountInfo?.medicalAid && {
+            medicalAidDetails: {
+              provider: accountInfo.medicalAid.provider,
+              memberNumber: accountInfo.medicalAid.memberNumber,
+              documentUrl: accountInfo.medicalAid.documentUrl,
+              isVerified: accountInfo.medicalAid.isVerified || false,
+            },
+          }),
           ...(appointmentType === 'home' && {
             location: {
               text: location.text || 'Custom location',
@@ -201,7 +227,10 @@ const useDoctor = (doctorId: string, medicalHistoryAttached: boolean = false) =>
       showToast('Please provide your location for home visit');
       return;
     }
-    dispatch(setConfirmDialog({isVisible: true,text: `Are you sure you want to book this appointment with ${paymentMethod === 'card' ? 'card payment' : 'cash payment'}`,okayBtn: 'Confirm',cancelBtn: 'Cancel',severity: true,response: (res:boolean) => {
+    const paymentText = paymentMethod === 'card' ? 'card payment' :
+                       paymentMethod === 'medical_aid' ? 'medical aid' : 'cash payment';
+
+    dispatch(setConfirmDialog({isVisible: true,text: `Are you sure you want to book this appointment with ${paymentText}?`,okayBtn: 'Confirm',cancelBtn: 'Cancel',severity: true,response: (res:boolean) => {
       if(res){
         if(paymentMethod === 'card'){
           const balance = accountInfo?.balance || 0;
@@ -212,7 +241,7 @@ const useDoctor = (doctorId: string, medicalHistoryAttached: boolean = false) =>
           async function handleTopUp() {
             const response = await handleTransaction({amount:cost,receiver:secrets?.appAccountId || '', sender:accountInfo?.userId || '', msg:'Transfer successful', type:'transfer',description:`${appointmentType} Appointment`});
             handleBookAppointment(response as boolean);
-          }   
+          }
           if(balance < cost){
             const bal = cost - balance;
             router.push({pathname:'/WebBrowser',params:{amount:bal,type:'book'}});
@@ -221,7 +250,13 @@ const useDoctor = (doctorId: string, medicalHistoryAttached: boolean = false) =>
           }else{
             handleTopUp();
           }
+        }else if(paymentMethod === 'medical_aid'){
+          // For medical aid, book appointment directly
+          // The doctor will handle medical aid claims separately
+          handleBookAppointment(true);
+          showToast('Appointment booked with medical aid. Please bring your medical aid card to the appointment.');
         }else{
+          // Cash payment
           handleBookAppointment(true);
         }
       }

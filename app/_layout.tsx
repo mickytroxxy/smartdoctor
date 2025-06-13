@@ -72,7 +72,6 @@ const Main = () => {
       (async() =>{
           const secrets = await getSecretKeys();
           if(secrets?.length > 0){
-            console.log(secrets[0])
             dispatch(setSecrets(secrets[0]))
           }
       })()

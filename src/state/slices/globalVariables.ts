@@ -17,7 +17,20 @@ const initialState: {secrets:SecretsType} = {
     vatFee:0,
     canSendSms:false,
     commissionFee:15,
-    website:''
+    website:'',
+    DOCTOR_SPECIALTIES:[
+      'General Practitioner',
+      'Cardiologist',
+      'Dermatologist',
+      'Pediatrician',
+      'Neurologist',
+      'Psychiatrist',
+      'Orthopedic',
+      'Gynecologist',
+      'Ophthalmologist',
+      'Dentist',
+      'AI Doctor'
+    ]
   }
 };
 

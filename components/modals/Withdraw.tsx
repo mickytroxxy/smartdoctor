@@ -133,13 +133,13 @@ export default function Withdraw({ attr }: WithdrawProps) {
                 <View style={styles.buttonContainer}>
                     <LinearButton
                         textInfo={{ text: 'CANCEL', color: colors.primary }}
-                        iconInfo={{ name: 'x', type: 'Feather', color: colors.white, size: 20 }}
+                        iconInfo={{ name: 'x', type: 'Feather', color: colors.primary, size: 20 }}
                         handleBtnClick={() => dispatch(setModalState({ isVisible: false }))}
                         style={styles.cancelButton}
                     />
                     <LinearButton
                         textInfo={{ text: 'WITHDRAW', color: colors.primary }}
-                        iconInfo={{ name: 'check', type: 'Feather', color: colors.white, size: 20 }}
+                        iconInfo={{ name: 'check', type: 'Feather', color: colors.primary, size: 20 }}
                         handleBtnClick={handleWithdraw}
                         style={styles.withdrawButton}
                     />

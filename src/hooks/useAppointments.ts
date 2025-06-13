@@ -10,6 +10,7 @@ import {
 } from '../state/slices/appointmentSlice';
 import {
   getUserAppointments,
+  getDoctorAppointmentsWithMedicalAid,
   updateAppointmentStatus,
   rescheduleAppointment,
   createPrescription,
@@ -86,11 +87,11 @@ const useAppointments = () => {
     dispatch(setLoading(true));
 
     try {
-      // Pass isDoctor flag to get the right appointments
-      const appointments = await getUserAppointments(
-        accountInfo.userId,
-        accountInfo.isDoctor
-      );
+      // Use enhanced function for doctors to get medical aid details
+      const appointments = accountInfo.isDoctor
+        ? await getDoctorAppointmentsWithMedicalAid(accountInfo.userId)
+        : await getUserAppointments(accountInfo.userId, false);
+
       dispatch(setAppointments(appointments));
     } catch (err) {
       dispatch(setError('Failed to fetch appointments'));

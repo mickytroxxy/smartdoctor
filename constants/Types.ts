@@ -77,6 +77,19 @@ export interface PlayMyJamProfile {
   practitionerNumber?: string;
   medicalHistory?: MedicalHistory;
   notificationToken?: string;
+  medicalAid?: {
+    provider: string;
+    memberNumber: string;
+    documentUrl: string;
+    isVerified: boolean;
+    uploadedAt: number;
+  };
+  // Doctor-managed user fields
+  managedByDoctor?: string; // Doctor's userId who created this user
+  doctorCreatedUser?: boolean; // Flag to indicate this user was created by a doctor
+  isActive?: boolean; // Doctor can enable/disable users
+  doctorUserCode?: string; // Unique code for doctor-created users
+  role?: string; // Role of the staff member (receptionist, assistant, etc.)
 }
 export interface Medication {
   name: string;
@@ -195,7 +208,8 @@ export interface SecretsType {
   googleApiKeyActive:boolean;
   deliveryFee:number;
   payFastMerchantId:string;
-  vatFee:number
+  vatFee:number,
+  DOCTOR_SPECIALTIES:string[]
 }
 
 export interface Appointment {
@@ -213,8 +227,14 @@ export interface Appointment {
   symptoms: string;
   notes: string;
   fee: number;
-  paymentMethod: 'cash' | 'card';
+  paymentMethod: 'cash' | 'card' | 'medical_aid';
   medicalHistoryAttached: boolean;
+  medicalAidDetails?: {
+    provider: string;
+    memberNumber: string;
+    documentUrl?: string;
+    isVerified: boolean;
+  };
   location?: {
     text: string;
     latitude: number;

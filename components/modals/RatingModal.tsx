@@ -152,7 +152,7 @@ const RatingModal: React.FC<RatingModalProps> = ({
                   type: 'Ionicons',
                   name: 'star',
                   size: 16,
-                  color: colors.white
+                  color: colors.primary
                 }}
                 handleBtnClick={handleSubmit}
                 disabled={selectedRating === 0 || !comment.trim() || submitting}

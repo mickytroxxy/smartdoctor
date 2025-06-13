@@ -117,6 +117,18 @@ const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
             </View>
 
             <View style={styles.detailSection}>
+              <Text style={styles.detailLabel}>Payment Method</Text>
+              <Text style={styles.detailValue}>
+                {appointment.paymentMethod === 'medical_aid'
+                  ? 'Medical Aid'
+                  : appointment.paymentMethod === 'card'
+                    ? 'Card Payment'
+                    : 'Cash Payment'
+                }
+              </Text>
+            </View>
+
+            <View style={styles.detailSection}>
               <Text style={styles.detailLabel}>Symptoms</Text>
               <Text style={styles.detailValue}>{appointment.symptoms || 'None provided'}</Text>
             </View>
@@ -165,6 +177,56 @@ const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
                       No medical history attached
                     </Text>
                   </View>
+                </View>
+              </View>
+            )}
+
+            {/* Medical Aid Details - Only show for doctors when payment method is medical aid */}
+            {isDoctor && appointment.paymentMethod === 'medical_aid' && appointment.medicalAidDetails && (
+              <View style={styles.detailSection}>
+                <Text style={styles.detailLabel}>Medical Aid Details</Text>
+                <View style={styles.medicalAidContainer}>
+                  <View style={styles.medicalAidHeader}>
+                    <Ionicons name="card" size={20} color={colors.green} />
+                    <Text style={styles.medicalAidTitle}>
+                      {appointment.medicalAidDetails.provider}
+                    </Text>
+                    {appointment.medicalAidDetails.isVerified && (
+                      <View style={styles.verifiedBadge}>
+                        <Ionicons name="checkmark-circle" size={16} color={colors.green} />
+                        <Text style={styles.verifiedText}>Verified</Text>
+                      </View>
+                    )}
+                  </View>
+
+                  <View style={styles.medicalAidDetails}>
+                    <Text style={styles.medicalAidLabel}>Member Number:</Text>
+                    <Text style={styles.medicalAidValue}>
+                      {appointment.medicalAidDetails.memberNumber}
+                    </Text>
+                  </View>
+
+                  {appointment.medicalAidDetails.documentUrl && (
+                    <TouchableOpacity
+                      style={styles.viewDocumentButton}
+                      onPress={() => {
+                        // Open document viewer or download
+                        console.log('View medical aid document:', appointment.medicalAidDetails?.documentUrl);
+                      }}
+                    >
+                      <Ionicons name="document-text" size={16} color={colors.primary} />
+                      <Text style={styles.viewDocumentText}>View Medical Aid Card</Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {!appointment.medicalAidDetails.isVerified && (
+                    <View style={styles.unverifiedWarning}>
+                      <Ionicons name="warning" size={16} color={colors.orange} />
+                      <Text style={styles.unverifiedText}>
+                        Medical aid not yet verified
+                      </Text>
+                    </View>
+                  )}
                 </View>
               </View>
             )}
@@ -502,6 +564,87 @@ const styles = StyleSheet.create({
     fontFamily: 'fontBold',
     color: colors.white,
     marginRight: 4,
+  },
+  medicalAidContainer: {
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(76, 175, 80, 0.3)',
+  },
+  medicalAidHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  medicalAidTitle: {
+    fontSize: 16,
+    fontFamily: 'fontBold',
+    color: colors.green,
+    marginLeft: 8,
+    flex: 1,
+  },
+  verifiedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(76, 175, 80, 0.2)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+  },
+  verifiedText: {
+    fontSize: 10,
+    fontFamily: 'fontBold',
+    color: colors.green,
+    marginLeft: 4,
+  },
+  medicalAidDetails: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  medicalAidLabel: {
+    fontSize: 12,
+    fontFamily: 'fontBold',
+    color: colors.tertiary,
+    marginRight: 8,
+  },
+  medicalAidValue: {
+    fontSize: 14,
+    fontFamily: 'fontLight',
+    color: colors.tertiary,
+  },
+  viewDocumentButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+    marginBottom: 8,
+  },
+  viewDocumentText: {
+    fontSize: 12,
+    fontFamily: 'fontBold',
+    color: colors.white,
+    marginLeft: 4,
+  },
+  unverifiedWarning: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 152, 0, 0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 152, 0, 0.3)',
+  },
+  unverifiedText: {
+    fontSize: 12,
+    fontFamily: 'fontLight',
+    color: colors.orange,
+    marginLeft: 4,
   },
 });
 

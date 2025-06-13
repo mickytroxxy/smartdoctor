@@ -15,21 +15,7 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import { setActiveUser } from "@/src/state/slices/accountInfo";
 import { useDispatch } from "react-redux";
 import useMessageList from "@/src/hooks/useMessageList";
-
-// Define doctor specialties array since DoctorSpecialty is a type, not a value
-const DOCTOR_SPECIALTIES: DoctorSpecialty[] = [
-  'General Practitioner',
-  'Cardiologist',
-  'Dermatologist',
-  'Pediatrician',
-  'Neurologist',
-  'Psychiatrist',
-  'Orthopedic',
-  'Gynecologist',
-  'Ophthalmologist',
-  'Dentist',
-  'AI Doctor'
-];
+import { useSecrets } from "@/src/hooks/useSecrets";
 
 // Stats Card Component
 const StatsCard = ({
@@ -310,6 +296,7 @@ const DoctorCard = ({
 
 export default function HomeScreen() {
   const router = useRouter();
+  const {secrets} = useSecrets();
   const { chatPreviews } = useMessageList();
   const dispatch = useDispatch();
   const {
@@ -501,7 +488,7 @@ export default function HomeScreen() {
                 </TouchableOpacity>
               </Animatable.View>
 
-              {DOCTOR_SPECIALTIES.map((specialty, index) => (
+              {secrets?.DOCTOR_SPECIALTIES.map((specialty, index) => (
                 <Animatable.View
                   key={specialty}
                   //animation="fadeInRight"
@@ -513,7 +500,7 @@ export default function HomeScreen() {
                       styles.specialtyItem,
                       filters.specialty === specialty ? styles.specialtyItemSelected : null,
                     ]}
-                    onPress={() => handleSpecialtyFilter(specialty)}
+                    onPress={() => handleSpecialtyFilter(specialty as DoctorSpecialty)}
                   >
                     <Text
                       style={[

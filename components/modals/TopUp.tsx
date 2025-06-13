@@ -48,13 +48,13 @@ export default function TopUp({ attr:{handleChange} }: TopUpProps) {
             <View style={styles.buttonContainer}>
                 <LinearButton
                     textInfo={{ text: 'CANCEL', color: colors.primary }}
-                    iconInfo={{ name: 'x', type: 'Feather', color: colors.white, size: 20 }}
+                    iconInfo={{ name: 'x', type: 'Feather', color: colors.primary, size: 20 }}
                     handleBtnClick={() => dispatch(setModalState({ isVisible: false }))}
                     style={styles.cancelButton}
                 />
                 <LinearButton
                     textInfo={{ text: 'TOP UP', color: colors.primary }}
-                    iconInfo={{ name: 'check', type: 'Feather', color: colors.white, size: 20 }}
+                    iconInfo={{ name: 'check', type: 'Feather', color: colors.primary, size: 20 }}
                     handleBtnClick={handleTopUp}
                     style={styles.topUpButton}
                 />

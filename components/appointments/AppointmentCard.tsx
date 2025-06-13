@@ -46,27 +46,52 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({ appointment, onPress 
         <StatusBadge status={appointment.status} />
       </View>
       <View style={styles.appointmentFooter}>
-        <View style={styles.typeContainer}>
-          <Ionicons
-            name={
-              appointment.type === 'surgery'
-                ? 'medical'
+        <View style={styles.leftFooter}>
+          <View style={styles.typeContainer}>
+            <Ionicons
+              name={
+                appointment.type === 'surgery'
+                  ? 'medical'
+                  : appointment.type === 'video'
+                    ? 'videocam'
+                    : 'home'
+              }
+              size={16}
+              color={colors.primary}
+            />
+            <Text style={styles.typeText}>
+              {appointment.type === 'surgery'
+                ? 'Surgery Visit'
                 : appointment.type === 'video'
-                  ? 'videocam'
-                  : 'home'
-            }
-            size={16}
-            color={colors.primary}
-          />
-          <Text style={styles.typeText}>
-            {appointment.type === 'surgery'
-              ? 'Surgery Visit'
-              : appointment.type === 'video'
-                ? 'Video Call'
-                : 'Home Visit'
-            }
-          </Text>
+                  ? 'Video Call'
+                  : 'Home Visit'
+              }
+            </Text>
+          </View>
+
+          <View style={styles.paymentContainer}>
+            <Ionicons
+              name={
+                appointment.paymentMethod === 'medical_aid'
+                  ? 'medical'
+                  : appointment.paymentMethod === 'card'
+                    ? 'card'
+                    : 'cash'
+              }
+              size={14}
+              color={colors.grey}
+            />
+            <Text style={styles.paymentText}>
+              {appointment.paymentMethod === 'medical_aid'
+                ? 'Medical Aid'
+                : appointment.paymentMethod === 'card'
+                  ? 'Card'
+                  : 'Cash'
+              }
+            </Text>
+          </View>
         </View>
+
         <Text style={styles.feeText}>{currencyFormatter(appointment.fee)}</Text>
       </View>
     </TouchableOpacity>
@@ -143,14 +168,28 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.faintGray,
   },
+  leftFooter: {
+    flex: 1,
+  },
   typeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 4,
   },
   typeText: {
     fontSize: 14,
     fontFamily: 'fontLight',
     color: colors.primary,
+    marginLeft: 4,
+  },
+  paymentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  paymentText: {
+    fontSize: 12,
+    fontFamily: 'fontLight',
+    color: colors.grey,
     marginLeft: 4,
   },
   feeText: {
